@@ -81,16 +81,12 @@ export function loadStreak(uid: string): StreakState | null {
     const parsed = JSON.parse(raw) as StreakState;
     if (
       typeof parsed.current !== "number" ||
-      typeof parsed.longest !== "number" ||
-      typeof parsed.buffers !== "number" ||
       (parsed.lastActiveDate !== null && typeof parsed.lastActiveDate !== "string")
     ) {
       return null;
     }
     return {
       current: parsed.current,
-      longest: parsed.longest,
-      buffers: parsed.buffers,
       lastActiveDate: parsed.lastActiveDate,
     };
   } catch {

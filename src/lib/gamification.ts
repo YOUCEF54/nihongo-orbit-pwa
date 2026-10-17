@@ -2,13 +2,11 @@
    Gamification engine — pure TypeScript, no side effects.
    · Mental Clarity Energy Pool
    · Modified SM-2 with cross-script cognitive penalty
-   · Streak Protection Engine (Rest-Day Buffers)
+   · Active-Day Tally (non-punitive streak)
    ============================================================ */
 
 export const ENERGY_MAX = 180;
 export const ENERGY_REGEN_MS = 8 * 60 * 1000;
-export const MAX_REST_BUFFERS = 3;
-export const BUFFER_EARN_STREAK = 7;
 
 export interface EnergyState {
   value: number;
@@ -135,14 +133,13 @@ export function formatInterval(days: number): string {
 }
 
 export interface StreakState {
+  /** Distinct calendar days with at least one recorded activity. */
   current: number;
-  longest: number;
-  buffers: number;
   lastActiveDate: string | null;
 }
 
 export function initStreak(): StreakState {
-  return { current: 0, longest: 0, buffers: 0, lastActiveDate: null };
+  return { current: 0, lastActiveDate: null };
 }
 
 export function toDateKey(date: Date): string {
@@ -157,64 +154,31 @@ export function daysBetween(fromKey: string, toKey: string): number {
 
 export interface StreakResult {
   state: StreakState;
-  usedBuffer: boolean;
-  broken: boolean;
+  /** True when `todayKey` advanced the tally (a new active day). */
+  newDay: boolean;
 }
 
+/**
+ * Record a day of activity. The tally only ever grows: the first activity of
+ * each distinct calendar day advances it by one, and a gap never resets it.
+ * Missed days are handled softly by the Momentum multiplier and Recovery
+ * Cache rather than by a punitive reset.
+ */
 export function recordActivity(
   state: StreakState,
   todayKey: string,
 ): StreakResult {
-  if (state.lastActiveDate === null) {
-    return {
-      state: { ...state, current: 1, longest: Math.max(state.longest, 1), lastActiveDate: todayKey },
-      usedBuffer: false,
-      broken: false,
-    };
-  }
-
-  const gap = daysBetween(state.lastActiveDate, todayKey);
+  const gap =
+    state.lastActiveDate === null
+      ? Number.POSITIVE_INFINITY
+      : daysBetween(state.lastActiveDate, todayKey);
 
   if (gap <= 0) {
-    return { state, usedBuffer: false, broken: false };
-  }
-
-  if (gap === 1) {
-    return {
-      state: grantIfEarned({ ...state, current: state.current + 1, longest: Math.max(state.longest, state.current + 1), lastActiveDate: todayKey }),
-      usedBuffer: false,
-      broken: false,
-    };
-  }
-
-  const missed = gap - 1;
-  const covered = Math.min(state.buffers, missed);
-  const broken = covered < missed;
-
-  if (broken) {
-    return {
-      state: { ...state, current: 1, longest: Math.max(state.longest, 1), buffers: state.buffers - covered, lastActiveDate: todayKey },
-      usedBuffer: covered > 0,
-      broken: true,
-    };
+    return { state, newDay: false };
   }
 
   return {
-    state: grantIfEarned({
-      ...state,
-      current: state.current + 1,
-      longest: Math.max(state.longest, state.current + 1),
-      buffers: state.buffers - covered,
-      lastActiveDate: todayKey,
-    }),
-    usedBuffer: covered > 0,
-    broken: false,
+    state: { current: state.current + 1, lastActiveDate: todayKey },
+    newDay: true,
   };
-}
-
-function grantIfEarned(state: StreakState): StreakState {
-  if (state.current > 0 && state.current % BUFFER_EARN_STREAK === 0) {
-    return { ...state, buffers: Math.min(MAX_REST_BUFFERS, state.buffers + 1) };
-  }
-  return state;
 }

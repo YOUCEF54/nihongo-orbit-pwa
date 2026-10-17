@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ENERGY_MAX,
-  MAX_REST_BUFFERS,
   initEnergy,
   initStreak,
   toDateKey,
@@ -27,7 +26,7 @@ const DAY = 86_400_000;
 test("energy + streak round-trip through storage", () => {
   const uid = "roundtrip";
   const energy: EnergyState = { value: 120, updatedAt: 12345 };
-  const streak: StreakState = { current: 4, longest: 9, buffers: 2, lastActiveDate: "2026-10-01" };
+  const streak: StreakState = { current: 4, lastActiveDate: "2026-10-01" };
   assert.equal(loadEnergy(uid), null);
   assert.equal(loadStreak(uid), null);
   saveEnergy(uid, energy);
@@ -61,24 +60,17 @@ test("noteReviewActivity counts the review day into the streak once a day", () =
   assert.equal(sameDay.streak.current, first.streak.current, "same-day reviews must not double the streak");
 });
 
-test("consecutive activity days grow the streak and earn rest buffers", () => {
+test("activity days grow the tally and never reset across a gap", () => {
   const uid = "daily";
   const start = Date.parse("2026-10-01T08:00:00Z");
   let streak = readStreakOrDefault(uid);
   for (let day = 0; day < 6; day += 1) {
-    const now = start + day * DAY;
-    ({ streak } = noteReviewActivity(uid, now));
+    ({ streak } = noteReviewActivity(uid, start + day * DAY));
   }
   assert.equal(streak.current, 6);
-  assert.equal(streak.buffers, 0);
-  const seventh = noteReviewActivity(uid, start + 6 * DAY);
-  assert.equal(seventh.streak.current, 7);
-  assert.equal(
-    seventh.streak.buffers,
-    1,
-    "every 7-streak day grants a rest buffer (capped by MAX_REST_BUFFERS)",
-  );
-  assert.ok(seventh.streak.buffers <= MAX_REST_BUFFERS);
+  // Skip two weeks: the tally must keep growing, never restart from zero.
+  const afterGap = noteReviewActivity(uid, start + 20 * DAY);
+  assert.equal(afterGap.streak.current, 7);
 });
 
 test("notePuzzleEntry spends puzzle energy and records the day", () => {

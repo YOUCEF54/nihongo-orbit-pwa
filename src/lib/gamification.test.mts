@@ -56,36 +56,26 @@ test("kanji carries a stronger cognitive penalty than kana", () => {
   assert.ok(scheduleReview(card, 2, "kanji").interval < scheduleReview(card, 2, "kana").interval);
 });
 
-test("consecutive days increment the streak", () => {
+test("consecutive days increment the tally", () => {
   const s1 = recordActivity(initStreak(), "2026-01-01").state;
   const s2 = recordActivity(s1, "2026-01-02");
   assert.equal(s2.state.current, 2);
-  assert.equal(s2.broken, false);
-  assert.equal(s2.state.longest, 2);
+  assert.equal(s2.newDay, true);
 });
 
-test("a rest-day buffer preserves the streak on a missed day", () => {
-  const state: StreakState = { current: 3, longest: 3, buffers: 1, lastActiveDate: "2026-01-01" };
-  const result = recordActivity(state, "2026-01-03");
-  assert.equal(result.state.current, 4);
-  assert.equal(result.state.buffers, 0);
-  assert.equal(result.usedBuffer, true);
-  assert.equal(result.broken, false);
+test("same-day activity does not double the tally", () => {
+  const first = recordActivity(initStreak(), "2026-01-01");
+  const again = recordActivity(first.state, "2026-01-01");
+  assert.equal(again.state.current, 1);
+  assert.equal(again.newDay, false);
 });
 
-test("streak breaks when buffers cannot cover the gap", () => {
-  const state: StreakState = { current: 9, longest: 9, buffers: 1, lastActiveDate: "2026-01-01" };
+test("a missed day never resets the tally", () => {
+  const state: StreakState = { current: 9, lastActiveDate: "2026-01-01" };
   const result = recordActivity(state, "2026-01-05");
-  assert.equal(result.state.current, 1);
-  assert.equal(result.state.buffers, 0);
-  assert.equal(result.broken, true);
-});
-
-test("a buffer is earned every 7 streak days", () => {
-  const state: StreakState = { current: 6, longest: 6, buffers: 0, lastActiveDate: "2026-01-06" };
-  const result = recordActivity(state, "2026-01-07");
-  assert.equal(result.state.current, 7);
-  assert.equal(result.state.buffers, 1);
+  assert.equal(result.state.current, 10);
+  assert.equal(result.newDay, true);
+  assert.equal(result.state.lastActiveDate, "2026-01-05");
 });
 
 test("date helpers compute whole days and ISO keys", () => {

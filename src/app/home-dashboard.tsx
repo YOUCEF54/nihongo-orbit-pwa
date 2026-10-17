@@ -105,7 +105,7 @@ export default function HomeDashboard({
               {greetingFor(new Date().getHours())}، {handle}!
             </h1>
             <p className="lang-ar mt-1 text-sm text-muted">
-              وجهة اليوم — أكمل مراجعات القطاع الأول راجع بجدولتك وابنِ سلسلتك.
+              وجهة اليوم — أكمل مراجعات القطاع الأول راجع بجدولتك وواصِل رصيد أيام نشاطك.
             </p>
           </div>
 
@@ -253,7 +253,7 @@ export default function HomeDashboard({
           </div>
           <p className="lang-ar text-xs leading-relaxed text-muted">
             كل بطاقة تُروى بخوارزمية FSRS، وكل مراجعة تُنهي بطاقة وتستهلك {REVIEW_ENERGY_COST} نقطة من
-            طاقة الصفاء وتُسجّل يوم نشاط في سلسلتك — احمِ سلسلتك بمخازن الراحة.
+            طاقة الصفاء وتُسجّل يوم نشاط في سلسلتك — ورصيد أيامك لا يُصفَّر عند الغياب، بل يذوّب زخمك فقط.
           </p>
         </div>
       </section>
