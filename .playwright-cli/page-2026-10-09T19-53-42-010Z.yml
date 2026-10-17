@@ -1,0 +1,18 @@
+- generic [ref=f2e2]:
+  - generic [ref=f2e3]:
+    - generic [ref=f2e4]: 日本語
+    - heading "تعلّم اليابانية" [level=1] [ref=f2e8]
+    - paragraph [ref=f2e9]: مرافقك اليومي لإتقان اليابانية بالعربية
+  - generic [ref=f2e10]:
+    - generic [ref=f2e11]:
+      - button "تسجيل الدخول" [ref=f2e12]
+      - button "حساب جديد" [ref=f2e13]
+    - generic [ref=f2e14]:
+      - textbox "البريد الإلكتروني" [ref=f2e15]
+      - textbox "كلمة المرور (6 أحرف على الأقل)" [ref=f2e16]
+      - button "تسجيل الدخول" [ref=f2e17]
+    - generic [ref=f2e18]: أو
+    - button "المتابعة باستخدام Google" [ref=f2e21]
+  - paragraph [ref=f2e27]:
+    - link "@learnjapanese.words" [ref=f2e28] [cursor=pointer]:
+      - /url: https://instagram.com/learnjapanese.words

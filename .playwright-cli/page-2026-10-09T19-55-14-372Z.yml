@@ -1,0 +1,45 @@
+- generic [active] [ref=f2e1]:
+  - alert [ref=f2e29]: تعلّم اليابانية
+  - generic [ref=f2e30]:
+    - complementary [ref=f2e31]:
+      - generic [ref=f2e32]:
+        - generic [ref=f2e33]: 日本語
+        - generic [ref=f2e37]:
+          - heading "تعلّم اليابانية" [level=1] [ref=f2e38]
+          - paragraph [ref=f2e39]: "@learnjapanese.words"
+      - navigation [ref=f2e40]:
+        - list [ref=f2e41]:
+          - listitem [ref=f2e42]:
+            - link "الرئيسية" [ref=f2e43] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f2e47]:
+            - link "الغاشا" [ref=f2e48] [cursor=pointer]:
+              - /url: /gacha
+          - listitem [ref=f2e52]:
+            - link "الحقيبة" [ref=f2e53] [cursor=pointer]:
+              - /url: /bag
+          - listitem [ref=f2e57]:
+            - link "البطاقات" [ref=f2e58] [cursor=pointer]:
+              - /url: /flashcards
+          - listitem [ref=f2e62]:
+            - link "الألعاب" [ref=f2e63] [cursor=pointer]:
+              - /url: /games
+          - listitem [ref=f2e69]:
+            - link "الديو" [ref=f2e70] [cursor=pointer]:
+              - /url: /dojo
+          - listitem [ref=f2e75]:
+            - link "المتصدّرون" [ref=f2e76] [cursor=pointer]:
+              - /url: /leaderboard
+          - listitem [ref=f2e80]:
+            - link "حسابي" [ref=f2e81] [cursor=pointer]:
+              - /url: /profile
+      - generic [ref=f2e85]:
+        - paragraph [ref=f2e86]: مرافقك اليومي لإتقان اليابانية — بطاقات، ألعاب، كروت غاشا وعشيرة تنتظرك.
+        - link "@learnjapanese.words" [ref=f2e87] [cursor=pointer]:
+          - /url: https://instagram.com/learnjapanese.words
+    - generic [ref=f2e88]:
+      - main [ref=f2e89]:
+        - paragraph [ref=f2e92]: جارٍ تحضير بطاقاتك…
+      - contentinfo [ref=f2e93]:
+        - link "@learnjapanese.words" [ref=f2e94] [cursor=pointer]:
+          - /url: https://instagram.com/learnjapanese.words

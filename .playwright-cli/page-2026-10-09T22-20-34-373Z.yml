@@ -1,0 +1,31 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e3]:
+    - banner [ref=f7e5]:
+      - generic [ref=f7e6]: 日本語
+      - generic [ref=f7e10]:
+        - heading "تعلّم اليابانية" [level=1] [ref=f7e11]
+        - paragraph [ref=f7e12]: "@learnjapanese.words"
+    - main [ref=f7e13]:
+      - paragraph [ref=f7e16]: جارٍ تحميل لوحتك…
+    - contentinfo [ref=f7e17]:
+      - link "@learnjapanese.words" [ref=f7e18] [cursor=pointer]:
+        - /url: https://instagram.com/learnjapanese.words
+    - navigation [ref=f7e19]:
+      - generic [ref=f7e21]:
+        - link "الرئيسية" [ref=f7e22] [cursor=pointer]:
+          - /url: /
+        - link "الغاشا" [ref=f7e27] [cursor=pointer]:
+          - /url: /gacha
+        - link "الحقيبة" [ref=f7e32] [cursor=pointer]:
+          - /url: /bag
+        - link "البطاقات" [ref=f7e37] [cursor=pointer]:
+          - /url: /flashcards
+        - link "الألعاب" [ref=f7e42] [cursor=pointer]:
+          - /url: /games
+        - link "الديو" [ref=f7e49] [cursor=pointer]:
+          - /url: /dojo
+        - link "المتصدّرون" [ref=f7e55] [cursor=pointer]:
+          - /url: /leaderboard
+        - link "حسابي" [ref=f7e60] [cursor=pointer]:
+          - /url: /profile
+  - alert [ref=f7e65]

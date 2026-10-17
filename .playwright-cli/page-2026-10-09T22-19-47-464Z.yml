@@ -1,0 +1,101 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - complementary [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - generic [ref=f3e5]: 日本語
+        - generic [ref=f3e9]:
+          - heading "تعلّم اليابانية" [level=1] [ref=f3e10]
+          - paragraph [ref=f3e11]: "@learnjapanese.words"
+      - navigation [ref=f3e12]:
+        - list [ref=f3e13]:
+          - listitem [ref=f3e14]:
+            - link "الرئيسية" [ref=f3e15] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f3e19]:
+            - link "الغاشا" [ref=f3e20] [cursor=pointer]:
+              - /url: /gacha
+          - listitem [ref=f3e24]:
+            - link "الحقيبة" [ref=f3e25] [cursor=pointer]:
+              - /url: /bag
+          - listitem [ref=f3e29]:
+            - link "البطاقات" [ref=f3e30] [cursor=pointer]:
+              - /url: /flashcards
+          - listitem [ref=f3e34]:
+            - link "الألعاب" [ref=f3e35] [cursor=pointer]:
+              - /url: /games
+          - listitem [ref=f3e41]:
+            - link "الديو" [ref=f3e42] [cursor=pointer]:
+              - /url: /dojo
+          - listitem [ref=f3e47]:
+            - link "المتصدّرون" [ref=f3e48] [cursor=pointer]:
+              - /url: /leaderboard
+          - listitem [ref=f3e52]:
+            - link "حسابي" [ref=f3e53] [cursor=pointer]:
+              - /url: /profile
+      - generic [ref=f3e57]:
+        - paragraph [ref=f3e58]: مرافقك اليومي لإتقان اليابانية — بطاقات، ألعاب، كروت غاشا وعشيرة تنتظرك.
+        - link "@learnjapanese.words" [ref=f3e59] [cursor=pointer]:
+          - /url: https://instagram.com/learnjapanese.words
+    - generic [ref=f3e60]:
+      - main [ref=f3e61]:
+        - generic [ref=f3e62]:
+          - generic [ref=f3e63]:
+            - generic [ref=f3e69]:
+              - heading "الغاشا" [level=1] [ref=f3e70]
+              - paragraph [ref=f3e71]: اسحب الكروت واكسب النقاط
+            - generic [ref=f3e72]:
+              - text: "50"
+              - generic [ref=f3e75]: توكن
+          - generic [ref=f3e76]:
+            - generic [ref=f3e77]:
+              - heading "عداد الضمان (Pity)" [level=2] [ref=f3e78]
+              - generic [ref=f3e79]:
+                - generic [ref=f3e80]:
+                  - generic [ref=f3e81]:
+                    - generic [ref=f3e82]: ضمان 5★
+                    - generic [ref=f3e83]: 0 / 70
+                  - paragraph [ref=f3e85]: يتبقى 70 سحب للضمان
+                - generic [ref=f3e86]:
+                  - generic [ref=f3e87]:
+                    - generic [ref=f3e88]: ضمان 4★
+                    - generic [ref=f3e89]: 0 / 10
+                  - paragraph [ref=f3e91]: يتبقى 10 سحب للضمان
+            - generic [ref=f3e92]:
+              - heading "احتمالات السحب" [level=2] [ref=f3e93]
+              - generic [ref=f3e94]:
+                - generic [ref=f3e95]:
+                  - generic [ref=f3e96]:
+                    - paragraph [ref=f3e97]: 3%
+                    - paragraph [ref=f3e98]: 5★ أسطوري
+                  - generic [ref=f3e99]:
+                    - paragraph [ref=f3e100]: 17%
+                    - paragraph [ref=f3e101]: 4★ نادر
+                  - generic [ref=f3e102]:
+                    - paragraph [ref=f3e103]: 80%
+                    - paragraph [ref=f3e104]: 3★ شائع
+                - paragraph [ref=f3e105]: ضمان 4★ كل 10 سحبات • ضمان 5★ كل 70 سحبة
+          - generic [ref=f3e106]:
+            - button "سحب واحد 10 سحب واحد" [ref=f3e107]:
+              - generic [ref=f3e108]:
+                - generic [ref=f3e109]: سحب واحد
+                - generic [ref=f3e110]: "10"
+              - paragraph [ref=f3e113]: سحب واحد
+            - button "سحب 10× 100 تحتاج 100 توكن" [disabled] [ref=f3e114]:
+              - generic [ref=f3e115]:
+                - generic [ref=f3e116]: سحب 10×
+                - generic [ref=f3e117]: "100"
+              - paragraph [ref=f3e120]: تحتاج 100 توكن
+          - generic [ref=f3e121]:
+            - paragraph [ref=f3e122]: كيف تكسب التوكنز؟
+            - generic [ref=f3e123]:
+              - generic [ref=f3e124]: دخول يومي +3
+              - generic [ref=f3e125]: تحدي اليوم +5
+              - generic [ref=f3e126]: اجتياز اختبار +5
+              - generic [ref=f3e127]: إنهاء لعبة +2
+              - generic [ref=f3e128]: درس قواعد +2
+              - generic [ref=f3e129]: ترقية مستوى +10
+            - paragraph [ref=f3e130]: التزم بالمراجعة اليومية وسترتفع مستواك سريعًا — كل مستوى جديد يمنحك 10 توكنز، وكروت «مكافأة التوكنز» تضاعف كل ما تكسبه
+      - contentinfo [ref=f3e131]:
+        - link "@learnjapanese.words" [ref=f3e132] [cursor=pointer]:
+          - /url: https://instagram.com/learnjapanese.words
+  - alert [ref=f3e133]

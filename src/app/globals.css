@@ -1,0 +1,1082 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Tactical Glass-Punk — unified design system
+   Glassmorphism ∩ Tactical Geometry (Arknights)
+   ∩ Kinetic Neon (ZZZ) ∩ Spatial Minimalism
+   Tuned for Arabic (RTL) → Japanese (LTR / vertical) EdTech.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   Typography tokens
+   Body + Headings = Cairo · Kanji = system CJK via Noto stack
+   Furigana = BIZ UDPGothic · Telemetry = JetBrains Mono
+   ------------------------------------------------------------ */
+@theme inline {
+  --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+  --font-jp: var(--font-notojp), "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --font-jp-sub: var(--font-bizud), var(--font-notojp), sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+  /* Mora Taiko strike-ring pulse */
+  --animate-strike: strike 0.35s ease-out both;
+  @keyframes strike {
+    0% {
+      transform: scale(0.6);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+}
+
+/* ------------------------------------------------------------
+   Palette — slate base + neon tactical accents
+   ------------------------------------------------------------ */
+@theme {
+  /* surfaces */
+  --color-void: #0b0d12;
+  --color-abyss: #12161f;
+  --color-raised: #1a2130;
+  --color-line: rgba(255, 255, 255, 0.1);
+  --color-specular: rgba(255, 255, 255, 0.18);
+
+  /* text */
+  --color-cream: #f4f6fc;
+  --color-muted: #9da7c0;
+  /* lifted for WCAG AA on dark surfaces (5.5:1 on void) */
+  --color-faint: #7e88a3;
+
+  /* kinetic accents */
+  --color-cyan: #00f0ff;
+  --color-crimson: #ff0055;
+  --color-hazard: #ffd600;
+  --color-amethyst: #a855f7;
+  --color-frequency: #00f0ff;
+  --color-amber: #f3d184;
+
+  /* calm minimalist accent scale */
+  --color-accent-teal: #0ea5e9;
+  --color-accent-amber: #f59e0b;
+  --color-accent-red: #ef4444;
+  --color-text-slate: #94a3b8;
+  --color-text-ink: #f1f5f9;
+
+  /* states */
+  --color-danger: #ff0055;
+  --color-warn: #ffd600;
+  --color-success: #00f0ff;
+
+  /* calm minimalist surfaces */
+  --color-bg-deep: #0b0e14;
+  --color-bg-slate: #121721;
+  --color-bg-raised: #1a2130;
+  --color-border-line: #1e293b;
+  --color-border-spec: rgba(255, 255, 255, 0.06);
+  --color-glass: rgba(18, 23, 33, 0.6);
+  --color-glass-border: rgba(255, 255, 255, 0.10);
+
+  /* legacy aliases (kept resolving for existing utility classes) */
+  --color-ink: #0b0d12;
+  --color-surface: #12161f;
+  --color-gold: #00f0ff;
+  --color-gold-glow: #7df9ff;
+  --color-vermilion: #ff0055;
+  --color-mizu-blue: #00f0ff;
+  --color-jp-purple: #a855f7;
+  --color-space-ink: #0b0d12;
+  --color-system-navy: #12161f;
+  --color-void-obsidian: #060709;
+  --color-text-primary: #f4f6fc;
+  --color-text-secondary: #9da7c0;
+  --color-text-muted: #7e88a3;
+}
+
+/* ------------------------------------------------------------
+   System variables
+   ------------------------------------------------------------ */
+:root {
+  /* glass surfacing */
+  --glass-base: rgba(18, 22, 31, 0.75);
+  --glass-raised: rgba(26, 33, 48, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-line: rgba(255, 255, 255, 0.1);
+
+  /* neon glows */
+  --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.35);
+  --glow-crimson: 0 0 20px rgba(255, 0, 85, 0.35);
+  --glow-hazard: 0 0 20px rgba(255, 214, 0, 0.32);
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
+  /* rhythm-hit green — stable game semantic across themes (Taiko PERFECT) */
+  --color-hit: #34d399;
+
+  /* brand gradient stops + foil (theme-switchable) */
+  --brand-hi: #7df9ff;
+  --brand-lo: #00b8cc;
+  --foil-a: rgba(0, 240, 255, 0.3);
+  --foil-b: rgba(0, 240, 255, 0.05);
+  --selection-bg: rgba(0, 240, 255, 0.28);
+
+  /* geometry */
+  --chamfer: 12px;
+  --chamfer-lg: 22px;
+  /* shared chamfer silhouette — reuse for clipped fills so borders follow the shape */
+  --chamfer-shape: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+  --radius-panel: 14px;
+  --radius-pill: 9999px;
+
+  /* motion */
+  --ease-tactical: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-kinetic: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ------------------------------------------------------------
+   Base + bidi constraints
+   ------------------------------------------------------------ */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* RTL document reset */
+  [dir="rtl"] {
+    letter-spacing: 0;
+    word-spacing: normal;
+  }
+
+  /* Strict Arabic text-block rule — never break huroof ligatures.
+     Scoped to .lang-ar so Latin telemetry tracking still applies. */
+  .lang-ar,
+  .lang-ar * {
+    letter-spacing: 0 !important;
+    word-spacing: normal;
+    line-height: 1.8;
+  }
+
+  /* Keyboard focus fallback — a visible ring for interactive elements
+     without a dedicated focus style. .btn-* keep their own indicator. */
+  :where(a, button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 2px;
+  }
+  :where(.btn-primary, .btn-cyan, .btn-telemetry, .btn-ghost, .btn-danger, .btn-mini):focus-visible {
+    outline: none;
+  }
+
+  /* Skip link — visually hidden until focused */
+  .skip-link {
+    position: fixed;
+    inset-block-start: 8px;
+    inset-inline-start: 8px;
+    z-index: 100;
+    transform: translateY(-200%);
+    border-radius: 9999px;
+    background: var(--color-cyan);
+    color: var(--color-void);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 10px 18px;
+    transition: transform 0.18s var(--ease-tactical);
+  }
+  .skip-link:focus-visible {
+    transform: none;
+    outline: none;
+  }
+}
+
+/* Japanese vertical writing utility */
+.vertical-jp {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+/* ------------------------------------------------------------
+   Telemetry labels (Latin / numeric only)
+   ------------------------------------------------------------ */
+.telemetry {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+  font-weight: 700;
+}
+.telemetry-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------
+   Layer 0 — slate base + diagnostic grid
+   ------------------------------------------------------------ */
+body {
+  background-color: var(--color-void);
+  color: var(--color-cream);
+  background-image:
+    radial-gradient(circle at 82% 6%, rgba(0, 240, 255, 0.09) 0%, transparent 52%),
+    radial-gradient(circle at 12% 90%, rgba(255, 0, 85, 0.07) 0%, transparent 50%),
+    linear-gradient(150deg, #0b0d12 0%, #12161f 55%, #0b0d12 100%);
+  background-attachment: fixed;
+}
+
+/* faint tactical grid + scanline noise */
+.texture-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 44px 44px, 44px 44px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 90%);
+}
+
+::selection {
+  background-color: var(--selection-bg);
+}
+
+/* ------------------------------------------------------------
+   Geometry utilities
+   ------------------------------------------------------------ */
+.chamfer {
+  clip-path: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+}
+.chamfer-lg {
+  clip-path: polygon(
+    var(--chamfer-lg) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-lg)),
+    calc(100% - var(--chamfer-lg)) 100%,
+    0 100%,
+    0 var(--chamfer-lg)
+  );
+}
+.chamfer-12 {
+  clip-path: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+}
+
+/* Chamfered frame — same silhouette as .chamfer-12, but re-draws the 1px
+   border along the two cut diagonals. A rectangular `border` + `clip-path`
+   leaves those edges uncovered; these two angled gradient bands seal them.
+   Colour follows `--chamfer-edge` (defaults to --color-line), width --chamfer-w. */
+.chamfer-border {
+  clip-path: var(--chamfer-shape);
+  background-origin: border-box;
+  background-clip: border-box;
+  background-image:
+    linear-gradient(
+      135deg,
+      transparent 0,
+      transparent calc(var(--chamfer) / 1.4142136),
+      var(--chamfer-edge, var(--color-line)) calc(var(--chamfer) / 1.4142136),
+      var(--chamfer-edge, var(--color-line))
+        calc(var(--chamfer) / 1.4142136 + var(--chamfer-w, 1px)),
+      transparent calc(var(--chamfer) / 1.4142136 + var(--chamfer-w, 1px)),
+      transparent 100%
+    ),
+    linear-gradient(
+      315deg,
+      transparent 0,
+      transparent calc(var(--chamfer) / 1.4142136),
+      var(--chamfer-edge, var(--color-line)) calc(var(--chamfer) / 1.4142136),
+      var(--chamfer-edge, var(--color-line))
+        calc(var(--chamfer) / 1.4142136 + var(--chamfer-w, 1px)),
+      transparent calc(var(--chamfer) / 1.4142136 + var(--chamfer-w, 1px)),
+      transparent 100%
+    );
+}
+
+/* foil sheen swept across a surface on hover/focus (clipped by chamfers) */
+.foil-overlay {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.foil-overlay::after {
+  content: "";
+  position: absolute;
+  inset-inline: -150%;
+  top: -150%;
+  bottom: -150%;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    var(--foil-a) 50%,
+    var(--foil-b) 56%,
+    transparent 64%
+  );
+  transform: translateY(72%) rotate(20deg);
+  opacity: 0;
+  transition:
+    opacity 0.45s var(--ease-tactical),
+    transform 0.65s var(--ease-tactical);
+  pointer-events: none;
+}
+.foil-overlay:hover::after,
+.foil-overlay:focus-visible::after {
+  opacity: 1;
+  transform: translateY(-6%) rotate(20deg);
+}
+
+/* ------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------ */
+@layer components {
+  .btn-primary,
+  .btn-cyan {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    overflow: hidden;
+    /* outer surface = rim; the fill is a nested chamfered layer so the
+       border/rim traces the clip shape instead of being sliced off at it */
+    background: rgba(255, 255, 255, 0.35);
+    color: var(--color-void);
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    clip-path: var(--chamfer-shape);
+    transition:
+      background 0.18s var(--ease-tactical),
+      transform 0.12s var(--ease-kinetic);
+  }
+  .btn-primary::before,
+  .btn-cyan::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    background: linear-gradient(160deg, var(--brand-hi) 0%, var(--color-cyan) 46%, var(--brand-lo) 100%);
+    clip-path: var(--chamfer-shape);
+    transition:
+      background 0.18s var(--ease-tactical),
+      inset 0.18s var(--ease-tactical);
+    pointer-events: none;
+  }
+  .btn-primary::after,
+  .btn-cyan::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.55) 50%, transparent 60%);
+    transform: translateX(-130%);
+    transition: transform 0.55s var(--ease-tactical);
+    pointer-events: none;
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-cyan:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.6);
+  }
+  .btn-primary:hover:not(:disabled)::before,
+  .btn-cyan:hover:not(:disabled)::before {
+    background: #ffffff;
+  }
+  .btn-primary:hover:not(:disabled)::after,
+  .btn-cyan:hover:not(:disabled)::after {
+    transform: translateX(130%);
+  }
+  .btn-primary:active:not(:disabled),
+  .btn-cyan:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn-primary:focus-visible,
+  .btn-cyan:focus-visible {
+    outline: none;
+    background: var(--color-crimson);
+  }
+  .btn-primary:focus-visible::before,
+  .btn-cyan:focus-visible::before {
+    inset: 2px;
+  }
+  .btn-primary:disabled,
+  .btn-cyan:disabled {
+    background: var(--color-line);
+    color: var(--color-faint);
+    cursor: not-allowed;
+  }
+  .btn-primary:disabled::before,
+  .btn-cyan:disabled::before {
+    background: var(--color-abyss);
+  }
+
+  /* Outline — tactical cyan */
+  .btn-telemetry,
+  .btn-ghost {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    /* outer surface = border; nested layer = tinted fill */
+    background: var(--color-cyan);
+    color: var(--color-cyan);
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    clip-path: var(--chamfer-shape);
+    transition:
+      background-color 0.18s var(--ease-tactical),
+      color 0.18s var(--ease-tactical),
+      transform 0.12s var(--ease-kinetic);
+  }
+  .btn-telemetry::before,
+  .btn-ghost::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    /* opaque so the accent frame underneath can't bleed through and swallow the label */
+    background-color: color-mix(in srgb, var(--color-cyan) 6%, var(--color-void));
+    clip-path: var(--chamfer-shape);
+    transition:
+      background-color 0.18s var(--ease-tactical),
+      inset 0.18s var(--ease-tactical);
+    pointer-events: none;
+  }
+  .btn-telemetry:hover:not(:disabled),
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--color-void);
+  }
+  .btn-telemetry:hover:not(:disabled)::before,
+  .btn-ghost:hover:not(:disabled)::before {
+    background-color: var(--color-cyan);
+  }
+  .btn-telemetry:active:not(:disabled),
+  .btn-ghost:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn-telemetry:focus-visible,
+  .btn-ghost:focus-visible {
+    outline: none;
+    background: var(--color-crimson);
+    color: var(--color-void);
+  }
+  .btn-telemetry:focus-visible::before,
+  .btn-ghost:focus-visible::before {
+    inset: 2px;
+  }
+  .btn-telemetry:disabled,
+  .btn-ghost:disabled {
+    background: var(--color-line);
+    color: var(--color-faint);
+    cursor: not-allowed;
+  }
+  .btn-telemetry:disabled::before,
+  .btn-ghost:disabled::before {
+    background-color: transparent;
+  }
+
+  /* Danger — crimson */
+  .btn-danger {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    /* outer surface = border; nested layer = tinted fill */
+    background: var(--color-crimson);
+    color: var(--color-crimson);
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    clip-path: var(--chamfer-shape);
+    transition:
+      background-color 0.18s var(--ease-tactical),
+      color 0.18s var(--ease-tactical);
+  }
+  .btn-danger::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    /* opaque so the crimson frame underneath can't bleed through and swallow the label */
+    background-color: color-mix(in srgb, var(--color-crimson) 8%, var(--color-void));
+    clip-path: var(--chamfer-shape);
+    transition: background-color 0.18s var(--ease-tactical);
+    pointer-events: none;
+  }
+  .btn-danger:hover:not(:disabled) {
+    color: #fff;
+  }
+  .btn-danger:hover:not(:disabled)::before {
+    background-color: var(--color-crimson);
+  }
+
+  /* Glass container */
+  .glass-panel {
+    background-color: var(--glass-base);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--card-shadow);
+  }
+  .gold-foil-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(135deg, var(--foil-a) 0%, var(--foil-b) 100%);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-tactical);
+    pointer-events: none;
+  }
+  .glass-panel:hover .gold-foil-overlay {
+    opacity: 0.35;
+  }
+
+  /* Minimalist game canvas — direction-neutral island inside RTL shell */
+  .game-canvas {
+    direction: ltr;
+    text-align: left;
+    isolate: isolate;
+  }
+
+  /* ------------------------------------------------------------
+     Fullscreen viewport-budget shell — one activity per screen,
+     no page scroll. Accounts for AppShell chrome (sticky header
+     + main top/bottom padding). 390px width design floor; below
+     600px viewport height a single safety fallback scroll applies.
+     ------------------------------------------------------------ */
+  .screen-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    height: calc(100dvh - 10rem - env(safe-area-inset-bottom));
+  }
+  .screen-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* Bounded internal scroll region (reference lists) — chrome stays pinned. */
+  .screen-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* keep native momentum scrolling inside clipped shells (iOS) */
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Horizontal scroller without a visible scrollbar (compact pickers). */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  @media (max-height: 599px) {
+    .screen-shell {
+      height: auto;
+      overflow-y: auto;
+    }
+  }
+  .game-canvas [dir="ltr"] {
+    letter-spacing: normal;
+  }
+
+  /* Puzzle tile */
+  .tile {
+    border-radius: var(--radius-panel);
+    border: 1px solid var(--color-line);
+    background-color: var(--color-bg-slate);
+  }
+  .tile--active {
+    border-color: var(--color-accent-teal);
+    box-shadow: 0 0 16px rgba(14, 165, 233, 0.25);
+  }
+  .tile--fill {
+    transition: background-color 250ms var(--ease-tactical);
+  }
+
+  /* Calm minimalist button */
+  .btn-mini {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    padding: 8px 16px;
+    background-color: var(--color-bg-raised);
+    color: var(--color-text-ink);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s var(--ease-tactical);
+  }
+  .btn-mini:hover:not(:disabled) {
+    border-color: var(--color-accent-teal);
+    color: var(--color-accent-teal);
+    box-shadow: 0 0 16px rgba(14, 165, 233, 0.25);
+  }
+  .btn-mini:disabled {
+    border-color: var(--color-line);
+    color: var(--color-text-slate);
+    cursor: not-allowed;
+  }
+
+  /* Reward modal backdrop */
+  .reward-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background-color: rgba(6, 7, 9, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  /* Arabic ligature safety — enforce zero tracking on Arabic text.
+     Merged: the base rule above already covers .lang-ar. */
+  [dir="rtl"],
+  [dir="rtl"] * {
+    letter-spacing: 0 !important;
+    word-spacing: normal;
+  }
+}
+
+/* ------------------------------------------------------------
+   Panel — glass + specular + corner ticks
+   ------------------------------------------------------------ */
+.panel {
+  position: relative;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-panel);
+  background: linear-gradient(180deg, var(--glass-raised) 0%, var(--glass-base) 100%);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.panel::before,
+.panel::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+.panel::before {
+  top: -1px;
+  inset-inline-start: -1px;
+  border-top: 2px solid var(--color-cyan);
+  border-inline-start: 2px solid var(--color-cyan);
+  border-start-start-radius: var(--radius-panel);
+}
+.panel::after {
+  bottom: -1px;
+  inset-inline-end: -1px;
+  border-bottom: 2px solid var(--color-cyan);
+  border-inline-end: 2px solid var(--color-cyan);
+  border-end-end-radius: var(--radius-panel);
+}
+.panel--crimson::before,
+.panel--crimson::after {
+  border-color: var(--color-crimson);
+}
+.panel--hazard::before,
+.panel--hazard::after {
+  border-color: var(--color-hazard);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--glass-line);
+}
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-cream);
+}
+.panel-title::before {
+  content: "";
+  width: 4px;
+  height: 14px;
+  background: var(--color-cyan);
+  box-shadow: var(--glow-cyan);
+  transform: skewX(-12deg);
+}
+.panel--crimson .panel-title::before {
+  background: var(--color-crimson);
+  box-shadow: var(--glow-crimson);
+}
+.panel--hazard .panel-title::before {
+  background: var(--color-hazard);
+  box-shadow: var(--glow-hazard);
+}
+.panel-body {
+  padding: 16px;
+}
+
+/* ------------------------------------------------------------
+   Diagnostic status badge
+   ------------------------------------------------------------ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-line);
+  border-inline-start-width: 3px;
+  border-radius: 4px;
+  background: rgba(8, 9, 12, 0.6);
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+}
+.status-badge.is-ok {
+  color: var(--color-cyan);
+  border-inline-start-color: var(--color-cyan);
+}
+.status-badge.is-warn {
+  color: var(--color-hazard);
+  border-inline-start-color: var(--color-hazard);
+}
+.status-badge.is-crit {
+  color: var(--color-crimson);
+  border-inline-start-color: var(--color-crimson);
+}
+
+/* ------------------------------------------------------------
+   HUD pill + icon socket
+   ------------------------------------------------------------ */
+.hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(18, 22, 31, 0.85), rgba(8, 9, 12, 0.9));
+  padding-block: 7px;
+  padding-inline: 14px 8px;
+}
+/* ------------------------------------------------------------
+   Chip / badge
+   ------------------------------------------------------------ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-line);
+  border-radius: 9999px;
+  background: rgba(8, 9, 12, 0.7);
+  padding: 4px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+.chip.is-cyan {
+  border-color: rgba(0, 240, 255, 0.45);
+  color: var(--color-cyan);
+}
+.chip.is-crimson {
+  border-color: rgba(255, 0, 85, 0.45);
+  color: var(--color-crimson);
+}
+.chip.is-hazard {
+  border-color: rgba(255, 214, 0, 0.45);
+  color: var(--color-hazard);
+}
+.chip.is-amethyst {
+  border-color: rgba(168, 85, 247, 0.5);
+  color: var(--color-amethyst);
+}
+.chip .count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-cyan);
+}
+
+/* ------------------------------------------------------------
+   Field
+   ------------------------------------------------------------ */
+.field {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background-color: var(--color-abyss);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--color-cream);
+  outline: none;
+  transition:
+    border-color 0.18s var(--ease-tactical),
+    box-shadow 0.18s var(--ease-tactical);
+}
+.field::placeholder {
+  color: var(--color-faint);
+}
+.field:focus {
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.14);
+}
+
+/* ------------------------------------------------------------
+   Nav item (logical properties)
+   ------------------------------------------------------------ */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-align: start;
+  transition:
+    color 0.16s var(--ease-tactical),
+    background-color 0.16s var(--ease-tactical);
+}
+.nav-item:hover {
+  color: var(--color-cream);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.nav-item.is-active {
+  color: var(--color-cyan);
+  background-color: rgba(0, 240, 255, 0.08);
+  box-shadow: inset 2px 0 0 var(--color-cyan);
+}
+
+/* ------------------------------------------------------------
+   Progress ring + meter
+   ------------------------------------------------------------ */
+.meter {
+  position: relative;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.meter-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--brand-lo), var(--color-cyan));
+}
+.meter-fill.is-hazard {
+  background: linear-gradient(90deg, #d9b400, var(--color-hazard));
+}
+.meter-fill.is-crimson {
+  background: linear-gradient(90deg, #a50037, var(--color-crimson), #ff5c8a);
+}
+
+/* ------------------------------------------------------------
+   Furigana ruby
+   ------------------------------------------------------------ */
+.ruby-jp {
+  font-family: var(--font-jp);
+}
+.ruby-jp rt {
+  font-family: var(--font-jp-sub);
+  font-size: 0.5em;
+  color: var(--color-cyan);
+  letter-spacing: 0.04em;
+}
+
+/* ------------------------------------------------------------
+   Hybrid theme — gilded glass
+   Brand accent remaps to imperial gold; true cyan survives as
+   the "frequency" token. Toggled via <html data-theme="hybrid">.
+   Unlayered rules win over the @theme layer, so utilities that
+   reference --color-cyan (text-cyan, bg-cyan/10, border-cyan, …)
+   flip to gold automatically.
+   ------------------------------------------------------------ */
+[data-theme="hybrid"] {
+  /* brand accent → imperial gold */
+  --color-cyan: #f3d184;
+  --color-gold: #f3d184;
+  --color-gold-glow: #ffe4a8;
+  --color-success: #f3d184;
+  --color-mizu-blue: #f3d184;
+  --color-frequency: #45f0df;
+
+  /* danger → vermilion */
+  --color-crimson: #ff2a55;
+  --color-danger: #ff2a55;
+  --color-vermilion: #ff2a55;
+
+  --brand-hi: #ffe4a8;
+  --brand-lo: #c99a10;
+  --foil-a: rgba(243, 209, 132, 0.35);
+  --foil-b: rgba(243, 209, 132, 0.06);
+  --selection-bg: rgba(243, 209, 132, 0.3);
+
+  /* warmer glass */
+  --glass-base: rgba(18, 22, 34, 0.76);
+  --glass-raised: rgba(26, 34, 48, 0.72);
+  --glass-border: rgba(243, 209, 132, 0.22);
+  --glass-line: rgba(255, 255, 255, 0.1);
+
+  --glow-cyan: 0 0 20px rgba(243, 209, 132, 0.3);
+  --glow-crimson: 0 0 20px rgba(230, 58, 80, 0.3);
+}
+
+[data-theme="hybrid"] body {
+  background-color: #08090c;
+  background-image:
+    radial-gradient(circle at 78% 10%, rgba(69, 240, 223, 0.1) 0%, transparent 55%),
+    radial-gradient(circle at 16% 86%, rgba(243, 209, 132, 0.08) 0%, transparent 52%),
+    radial-gradient(circle at 50% 45%, rgba(168, 85, 247, 0.05) 0%, transparent 65%),
+    linear-gradient(150deg, #0b0c10 0%, #12161f 55%, #0b0c10 100%);
+}
+
+[data-theme="hybrid"] .texture-layer {
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(244, 246, 252, 0.5), transparent),
+    radial-gradient(1px 1px at 70% 65%, rgba(243, 209, 132, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 45% 82%, rgba(69, 240, 223, 0.4), transparent),
+    radial-gradient(1px 1px at 85% 20%, rgba(244, 246, 252, 0.35), transparent),
+    radial-gradient(1px 1px at 35% 12%, rgba(244, 246, 252, 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 60% 45%, rgba(168, 85, 247, 0.35), transparent);
+  background-size:
+    180px 180px,
+    220px 220px,
+    260px 260px,
+    200px 200px,
+    240px 240px,
+    300px 300px;
+}
+
+/* ------------------------------------------------------------
+   Minimal theme — calm gacha minimalism.
+   Brand accent remaps to calm teal, warm accents to amber,
+   danger to muted red, text to the slate scale. Toggled via
+   <html data-theme="minimal">. Unlayered rules win over the
+   @theme layer, so utilities that reference --color-cyan
+   (text-cyan, bg-cyan/10, border-cyan, …) flip to calm
+   teal automatically.
+   ------------------------------------------------------------ */
+[data-theme="minimal"] {
+  /* brand accent → calm teal */
+  --color-cyan: #0ea5e9;
+  --color-gold: #0ea5e9;
+  --color-gold-glow: #7dd3fc;
+  --color-success: #0ea5e9;
+  --color-mizu-blue: #0ea5e9;
+  --color-frequency: #0ea5e9;
+
+  /* warm accent → calm amber */
+  --color-amber: #f59e0b;
+
+  /* danger → muted red, warning → amber */
+  --color-crimson: #ef4444;
+  --color-danger: #ef4444;
+  --color-vermilion: #ef4444;
+  --color-hazard: #f59e0b;
+  --color-warn: #f59e0b;
+
+  /* text → slate scale */
+  --color-cream: #f1f5f9;
+  --color-muted: #94a3b8;
+
+  --brand-hi: #7dd3fc;
+  --brand-lo: #0284c9;
+  --foil-a: rgba(14, 165, 233, 0.22);
+  --foil-b: rgba(14, 165, 233, 0.04);
+  --selection-bg: rgba(14, 165, 233, 0.25);
+
+  /* cooler glass */
+  --glass-base: rgba(18, 23, 33, 0.72);
+  --glass-raised: rgba(26, 33, 48, 0.7);
+  --glass-border: rgba(148, 163, 184, 0.2);
+  --glass-line: rgba(255, 255, 255, 0.08);
+
+  --glow-cyan: 0 0 16px rgba(14, 165, 233, 0.25);
+  --glow-crimson: 0 0 16px rgba(239, 68, 68, 0.25);
+}
+
+/* Legacy gold utilities — harmless alias in tactical (gold → cyan) */
+.chip.is-gold {
+  border-color: rgba(243, 209, 132, 0.45);
+  color: var(--color-gold);
+}
+/* ------------------------------------------------------------
+   Reduced motion
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-cyan,
+  .btn-telemetry,
+  .btn-ghost,
+  .btn-danger {
+    transition: none;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
