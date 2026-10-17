@@ -92,3 +92,8 @@ export function wordAt(index: number): DailyWord {
   const wrapped = ((index % POOL.length) + POOL.length) % POOL.length;
   return toDailyWord(POOL[wrapped]);
 }
+
+/** Every word in the pool, in seed order (used by the admin panel). */
+export function allDailyWords(): DailyWord[] {
+  return POOL.map(toDailyWord);
+}

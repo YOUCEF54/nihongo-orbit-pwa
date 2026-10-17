@@ -8,8 +8,15 @@ import {
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { DEFAULT_THEME, THEME_IDS, THEME_STORAGE_KEY } from "@/lib/themes";
 
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("learnjp:theme");if(t==="tactical"||t==="hybrid"||t==="minimal"){document.documentElement.dataset.theme=t;return;}document.documentElement.dataset.theme="tactical";}catch(e){document.documentElement.dataset.theme="tactical";}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem(${JSON.stringify(
+  THEME_STORAGE_KEY,
+)});var ok=${JSON.stringify(THEME_IDS)};if(ok.indexOf(t)<0){t=${JSON.stringify(
+  DEFAULT_THEME,
+)};}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme=${JSON.stringify(
+  DEFAULT_THEME,
+)};}})();`;
 
 /** Arabic headings — Cairo */
 const cairo = Cairo({

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gen:wotd": "node scripts/gen-wotd-images.mjs",
+    "predev": "npm run gen:wotd",
+    "prebuild": "npm run gen:wotd"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

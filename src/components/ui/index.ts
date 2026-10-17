@@ -7,6 +7,7 @@ export { default as StarlightPanel } from "./StarlightPanel";
 export { default as StudyCard } from "./StudyCard";
 export { default as RewardModal, jadePayout, type RewardPayout } from "./RewardModal";
 export { default as EmptyState } from "./EmptyState";
+export { default as ReadingStack } from "./ReadingStack";
 export { default as MiniCarousel, type CarouselItem } from "./MiniCarousel";
 export { useStage, StageViewport, StageToggle, PauseToggle, PausedOverlay } from "./Stage";
 export { useDialogFocus } from "./use-dialog-focus";

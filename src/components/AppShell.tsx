@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { isAdmin } from "@/lib/admin";
 import { DOCK_ROUTES, TERMINAL_ROUTES, handleLabelFor, type ShellIcon } from "@/lib/shell";
 import { useJapaneseVoice } from "@/lib/use-japanese-voice";
 import ThemeToggle from "./ThemeToggle";
@@ -329,6 +330,22 @@ export default function AppShell({
                     <span className="lang-ar block text-faint">تسجيلات مدمجة + صوت النظام</span>
                   </span>
                 </button>
+                {isAdmin(userEmail) && (
+                  <a
+                    href="/admin"
+                    data-testid="terminal-admin"
+                    onClick={() => setTerminalOpen(false)}
+                    className="mt-3 flex w-full items-center gap-3 rounded-xl border border-amber/40 bg-amber/5 px-4 py-3 text-start transition hover:border-amber/60 hover:bg-amber/10"
+                  >
+                    <IconGear className="h-5 w-5 flex-none text-amber" />
+                    <span>
+                      <span className="lang-ar block text-sm font-bold text-cream">
+                        لوحة التحكم
+                      </span>
+                      <span className="lang-ar block text-faint">السمات وصور كلمة اليوم</span>
+                    </span>
+                  </a>
+                )}
                 <button type="button" onClick={handleLogout} className="btn-danger mt-3 w-full">
                   <IconBolt className="h-4 w-4" />
                   <span className="lang-ar">تسجيل الخروج</span>

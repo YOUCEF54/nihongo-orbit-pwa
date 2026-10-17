@@ -338,7 +338,7 @@ function RoundView({
               >
                 <ChipFace
                   text={part.text}
-                  sub={part.reading}
+                  sub={`${part.reading} (${part.romaji})`}
                   hint={difficulty === "beginner" ? part.meaningAr : undefined}
                 />
               </button>

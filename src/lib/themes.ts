@@ -1,17 +1,30 @@
+import { THEME_DEFAULT_ID, THEME_NAMES } from "./theme-config";
+
 export const THEME_STORAGE_KEY = "learnjp:theme";
 
-export const THEMES = [
-  { id: "tactical", ar: "التكتيكي", swatch: "#00f0ff" },
-  { id: "hybrid", ar: "الهجين", swatch: "#f3d184" },
-  { id: "minimal", ar: "الحد الأدنى", swatch: "#0ea5e9" },
-] as const;
+/** Fixed set of theme ids. Names + default come from theme-config.ts. */
+export const THEME_IDS = ["tactical", "hybrid", "minimal"] as const;
 
-export type ThemeId = (typeof THEMES)[number]["id"];
+export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = "tactical";
+const SWATCHES: Record<ThemeId, string> = {
+  tactical: "#00f0ff",
+  hybrid: "#f3d184",
+  minimal: "#0ea5e9",
+};
+
+export const THEMES: { id: ThemeId; ar: string; swatch: string }[] = THEME_IDS.map(
+  (id) => ({ id, ar: THEME_NAMES[id] || id, swatch: SWATCHES[id] }),
+);
+
+export const DEFAULT_THEME: ThemeId = (THEME_IDS as readonly string[]).includes(
+  THEME_DEFAULT_ID,
+)
+  ? (THEME_DEFAULT_ID as ThemeId)
+  : "tactical";
 
 export function isThemeId(value: string | null | undefined): value is ThemeId {
-  return THEMES.some((t) => t.id === value);
+  return THEME_IDS.some((id) => id === value);
 }
 
 export function resolveTheme(value: string | null | undefined): ThemeId {

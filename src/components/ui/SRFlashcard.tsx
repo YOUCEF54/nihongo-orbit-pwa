@@ -15,6 +15,7 @@ import PitchContour from "@/components/games/PitchContour";
 import { IconVolume } from "@/components/icons";
 import { PITCH_LEGEND_AR, getPitchAccentPattern } from "@/lib/pitch";
 import type { AccentType } from "@/types/learning";
+import ReadingStack from "./ReadingStack";
 
 export interface FlashcardSentence {
   jp: string;
@@ -141,15 +142,20 @@ export default function SRFlashcard({ data, onGrade, className }: SRFlashcardPro
             <span className="font-mono text-cyan">{data.script === "kanji" ? "漢" : "あ"}</span>
           </span>
           <div className="flex flex-col items-center gap-3">
-            {data.reading && (
-              <span className="font-jp-sub text-lg text-cyan/80">{data.reading}</span>
-            )}
+            {data.reading ? (
+              <ReadingStack
+                reading={data.reading}
+                romaji={data.romaji}
+                className="gap-1"
+                readingClassName="font-jp-sub text-lg text-cyan/80"
+                romajiClassName="telemetry tracking-[0.28em] text-muted"
+              />
+            ) : data.romaji ? (
+              <span className="telemetry tracking-[0.28em] text-muted">{data.romaji}</span>
+            ) : null}
             <span className="font-jp text-8xl leading-none text-cream drop-shadow-[var(--glow-cyan)]">
               {data.word}
             </span>
-            {data.romaji && (
-              <span className="telemetry tracking-[0.28em] text-muted">{data.romaji}</span>
-            )}
           </div>
           <span className="lang-ar absolute bottom-5 text-xs text-faint">اضغط للكشف</span>
         </div>

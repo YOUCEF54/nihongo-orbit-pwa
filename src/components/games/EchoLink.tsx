@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SeedVocabularyItem } from "@/lib/data";
 import { playVocabWord, prefetchVocabAudio, type Playback } from "@/lib/japanese-audio";
 import { pitchPatternOf } from "@/lib/pitch";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, ReadingStack } from "@/components/ui";
 import { hash, makeRandom, shuffle } from "@/lib/random";
 
 type EchoMode = "beginner" | "advanced";
@@ -287,11 +287,13 @@ export default function EchoLink({
             {item.japaneseText}
           </span>
           {mode === "beginner" && (
-            <div className="mt-2 flex items-center gap-2 text-sm" dir="ltr">
-              <span className="telemetry text-amber">{item.romaji}</span>
-              <span className="text-faint">·</span>
-              <span className="font-jp text-muted">{item.readingFurigana}</span>
-            </div>
+            <ReadingStack
+              reading={item.readingFurigana}
+              romaji={item.romaji}
+              className="mt-2 gap-1"
+              readingClassName="font-jp text-sm text-muted"
+              romajiClassName="telemetry text-xs text-amber"
+            />
           )}
           <div className="mt-4 flex items-center gap-2">
             <button type="button" data-testid="echo-listen" onClick={() => play(mode === "advanced" ? 1 : 0.9)} className="btn-telemetry px-5">

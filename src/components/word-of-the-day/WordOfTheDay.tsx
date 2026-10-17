@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconClose, IconSpark, IconVolume } from "@/components/icons";
-import { useDialogFocus } from "@/components/ui";
+import { useDialogFocus, ReadingStack } from "@/components/ui";
 import { speakJapanese } from "@/lib/japanese-tts";
+import { wotdImageUrl } from "@/lib/wotd-image-manifest";
 import { dailyWordIndex, wordAt } from "@/lib/word-of-the-day";
 
 export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }) {
@@ -12,6 +14,7 @@ export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const word = wordAt(index);
+  const imageUrl = wotdImageUrl(word.id);
 
   const dialogRef = useDialogFocus<HTMLDivElement>(open);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -138,24 +141,38 @@ export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }
                 <IconClose className="h-4 w-4" />
               </button>
 
-              <div
-                data-testid="wotd-hero"
-                className="relative flex h-40 w-full items-center justify-center overflow-hidden bg-gradient-to-br from-cyan/10 to-transparent"
-              >
-                {word.art ? (
+                <div
+                  data-testid="wotd-hero"
+                  className="relative flex h-48 w-full items-center justify-center overflow-hidden bg-gradient-to-br from-cyan/10 to-transparent"
+                >
+                  {imageUrl ? (
+                    <Image
+                      src={imageUrl}
+                      alt={word.arabicTranslation}
+                      fill
+                      unoptimized
+                      sizes="360px"
+                      data-testid="wotd-image"
+                      className="object-cover"
+                    />
+                  ) : word.art ? (
+                    <span
+                      data-testid="wotd-art"
+                      role="img"
+                      aria-label={word.arabicTranslation}
+                      className="relative select-none text-7xl drop-shadow-[0_0_28px_rgba(0,240,255,0.35)]"
+                    >
+                      {word.art}
+                    </span>
+                  ) : (
+                    <span className="font-jp pointer-events-none absolute -bottom-6 start-2 select-none text-[10rem] leading-none text-cyan/5">
+                      {word.japaneseText}
+                    </span>
+                  )}
                   <span
-                    data-testid="wotd-art"
-                    role="img"
-                    aria-label={word.arabicTranslation}
-                    className="relative select-none text-7xl drop-shadow-[0_0_28px_rgba(0,240,255,0.35)]"
-                  >
-                    {word.art}
-                  </span>
-                ) : (
-                  <span className="font-jp pointer-events-none absolute -bottom-6 start-2 select-none text-[10rem] leading-none text-cyan/5">
-                    {word.japaneseText}
-                  </span>
-                )}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-void via-void/70 to-transparent"
+                  />
                 <span className="lang-ar absolute bottom-3 end-3 z-10 flex items-center gap-1.5 rounded-full border border-cyan/30 bg-void/60 px-3 py-1.5 text-xs font-bold text-cyan backdrop-blur-md">
                   <IconSpark className="h-3 w-3" />
                   كلمة اليوم
@@ -181,21 +198,19 @@ export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }
                   </button>
 
                   <div className="flex flex-col items-center">
-                    <span className="lang-ar text-sm font-medium text-amber" dir="ltr">
-                      {word.furigana}
-                    </span>
+                    <ReadingStack
+                      reading={word.furigana}
+                      romaji={word.romaji}
+                      className="mb-1 gap-0.5"
+                      readingClassName="lang-ar text-sm font-medium text-amber"
+                      romajiClassName="telemetry text-xs text-cyan/80"
+                      romajiTestId="wotd-romaji"
+                    />
                     <span
                       data-testid="wotd-glyph-main"
-                      className="font-jp bg-gradient-to-b from-white to-cream bg-clip-text text-6xl font-extrabold tracking-wider text-transparent"
+                      className="font-jp bg-gradient-to-b from-white to-cream bg-clip-text text-6xl font-extrabold tracking-wider text-transparent drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]"
                     >
                       {word.japaneseText}
-                    </span>
-                    <span
-                      data-testid="wotd-romaji"
-                      className="telemetry mt-2 text-xs text-cyan/80"
-                      dir="ltr"
-                    >
-                      {word.romaji}
                     </span>
                   </div>
 
