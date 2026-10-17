@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { EnergyPanel, StarlightPanel, StreakPanel, StudyCard } from "@/components/ui";
+import { EnergyPanel, StarlightPanel, StreakPanel } from "@/components/ui";
+import WordOfTheDay from "@/components/word-of-the-day/WordOfTheDay";
 import { IconArchive, IconBolt, IconDojo, IconSpark, IconTrophy, IconOrbit } from "@/components/icons";
 import { handleLabelFor } from "@/lib/shell";
 import { dueInDays, masteryToCard } from "@/lib/fsrs";
@@ -10,8 +11,6 @@ import { loadMasteryLocal } from "@/lib/mastery";
 import { initStreak, type StreakState } from "@/lib/gamification";
 import { loadStreak, REVIEW_ENERGY_COST } from "@/lib/progress-state";
 import { VOCAB_SEED } from "@/data/vocab.seed";
-import { KANJI_SEED } from "@/data/kanji.seed";
-import type { SeedKanjiNode } from "@/lib/data";
 import type { UserMasteryState } from "@/types/learning";
 
 function greetingFor(hour: number): string {
@@ -19,15 +18,6 @@ function greetingFor(hour: number): string {
   if (hour >= 12 && hour < 18) return "مساء الخير";
   if (hour >= 18 && hour < 23) return "مساء الخير";
   return "ليلة هادئة";
-}
-
-function kanjiForToday(list: SeedKanjiNode[]): SeedKanjiNode {
-  const now = new Date();
-  const key = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(
-    now.getDate(),
-  ).padStart(2, "0")}`;
-  const idx = parseInt(key, 10) % list.length;
-  return list[idx];
 }
 
 export default function HomeDashboard({
@@ -48,10 +38,6 @@ export default function HomeDashboard({
 
   const sector1Vocab = useMemo(
     () => VOCAB_SEED.filter((word) => word.sector === "sector-1"),
-    [],
-  );
-  const sector1Kanji = useMemo(
-    () => KANJI_SEED.filter((node) => node.sector === "sector-1"),
     [],
   );
 
@@ -77,10 +63,6 @@ export default function HomeDashboard({
       setStreak(loadStreak(userId) ?? initStreak());
     });
   }, [userId]);
-
-  const kanjiToday = kanjiForToday(sector1Kanji);
-  const kanjiReading = kanjiToday.onyomi?.[0] ?? kanjiToday.kunyomi?.[0] ?? "";
-  const kanjiMeaning = kanjiToday.arabicMeanings.slice(0, 2).join(" / ");
 
   const goals = [
     { label: "أتقنت حتى الآن", value: reviewed, total: deckSize, cls: "is-cyan" },
@@ -109,19 +91,9 @@ export default function HomeDashboard({
             </p>
           </div>
 
-          <Link
-            href="/practice#matrix"
-            className="glass-panel group block p-3"
-            suppressHydrationWarning
-            aria-label="كانجي اليوم"
-          >
-            <StudyCard
-              kanji={kanjiToday.character}
-              furigana={kanjiReading}
-              arabicTranslation={kanjiMeaning}
-              rootCategory={kanjiToday.radicals[0]?.arabicName ?? "جذر الكانجي"}
-            />
-          </Link>
+          <div className="shrink-0">
+            <WordOfTheDay />
+          </div>
         </div>
       </section>
 

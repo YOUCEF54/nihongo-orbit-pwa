@@ -199,3 +199,11 @@ export function IconPlay({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconClose({ className }: IconProps) {
+  return (
+    <svg {...baseProps(className)}>
+      <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
+    </svg>
+  );
+}
