@@ -9,7 +9,8 @@ export function useStage() {
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded((value) => !value), []);
   const collapse = useCallback(() => setExpanded(false), []);
-  return { expanded, toggle, collapse };
+  const expand = useCallback(() => setExpanded(true), []);
+  return { expanded, toggle, collapse, expand };
 }
 
 /** Wraps an activity. Collapsed it fills its flex slot; expanded it becomes a

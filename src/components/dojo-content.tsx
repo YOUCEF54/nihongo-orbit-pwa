@@ -14,7 +14,7 @@ import {
   StageViewport,
   useStage,
 } from "@/components/ui";
-import { LockedGameCard } from "@/components/games";
+import ActivityBrief from "@/components/dojo/ActivityBrief";
 import { SECTORS, sectorById, SECTOR_ACCENT_CLASSES } from "@/lib/curriculum";
 import type { SectorId } from "@/types/curriculum";
 import { DOJO_STEPS, DOJO_STEP_COUNT, stepIndexForHash } from "@/lib/dojo-steps";
@@ -121,6 +121,7 @@ export default function DojoContent({
     ...loadMasteryLocal(userId),
   }));
   const [activeStep, setActiveStep] = useState(0);
+  const [armedStep, setArmedStep] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const mounted = useMounted();
   const stage = useStage();
@@ -196,6 +197,8 @@ export default function DojoContent({
     clearToastTimer();
     setToast(null);
     stepRef.current = next;
+    setArmedStep(null);
+    stage.collapse();
     setActiveStep(next);
   };
 
@@ -205,6 +208,8 @@ export default function DojoContent({
     clearToastTimer();
     setToast(null);
     stepRef.current = clamped;
+    setArmedStep(null);
+    stage.collapse();
     setActiveStep(clamped);
   };
 
@@ -247,6 +252,18 @@ export default function DojoContent({
     masteriesUnavailableRef.current =
       typeof window !== "undefined" && window.localStorage.getItem(MASTERY_DB_FLAG) === "1";
   }, []);
+
+  // Each activity step shows an inline brief; the activity only mounts (and
+  // goes fullscreen) after the user launches it, and unmounts again on exit.
+  const startActivity = (index: number) => {
+    setArmedStep(index);
+    stage.expand();
+  };
+
+  const exitBriefing = () => {
+    stage.collapse();
+    setArmedStep(null);
+  };
 
   const selectSector = (id: SectorId) => {
     setActiveSector(id);
@@ -351,24 +368,26 @@ export default function DojoContent({
     }
   };
 
-  const lockedStep = (
-    titleAr: string,
-    descAr: string,
-    seenCountValue: number,
-    requiredCount: number,
+  const brief = (
+    index: number,
+    opts?: {
+      locked?: boolean;
+      seenCount?: number;
+      requiredCount?: number;
+      poolCount?: number;
+      poolLabel?: string;
+    },
   ) => (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <LockedGameCard
-        titleAr={titleAr}
-        descAr={descAr}
-        seenCount={seenCountValue}
-        requiredCount={requiredCount}
-        className="flex-1"
-      />
-      <button type="button" data-testid="dojo-locked-next" onClick={() => move(1)} className="btn-cyan w-full">
-        <span className="lang-ar">التالي ←</span>
-      </button>
-    </div>
+    <ActivityBrief
+      step={DOJO_STEPS[index]}
+      locked={opts?.locked}
+      seenCount={opts?.seenCount}
+      requiredCount={opts?.requiredCount}
+      poolCount={opts?.poolCount}
+      poolLabel={opts?.poolLabel}
+      onStart={() => startActivity(index)}
+      onNext={() => move(1)}
+    />
   );
 
   const renderStep = (index: number) => {
@@ -447,12 +466,19 @@ export default function DojoContent({
           </div>
         );
       case 1:
-        return <StrokeStarters />;
+        return armedStep === 1 ? (
+          <StrokeStarters />
+        ) : (
+          brief(1, { poolCount: playableKanji.length, poolLabel: "كانجي متاح" })
+        );
       case 2:
-        return (
+        return armedStep === 2 ? (
           <SyntaxScramble onFinish={() => completeStep("اكتمل قطار الجمل — انتقال تلقائي")} />
+        ) : (
+          brief(2)
         );
       case 3:
+        if (armedStep !== 3) return brief(3, { poolCount: sectorVocab.length });
         return deckData ? (
           <div className="flex h-full min-h-0 flex-col">
             <SRFlashcard data={deckData} onGrade={(g, next) => handleGrade(currentWord.id, g, next)} />
@@ -475,17 +501,18 @@ export default function DojoContent({
           <EmptyState descAr="لا توجد بطاقات في هذا القطاع بعد — يتم إطلاق المحتوى على دفعات." />
         );
       case 4:
-        return !echoUnlocked && echoUnlock ? (
-          lockedStep(
-            echoUnlock.titleAr,
-            "يتطلب مراجعة عدد كافٍ من مفردات هذا القطاع قبل فتح صدى المعاني، ولن تُدرَج إلا كلمات رأيتها.",
-            echoUnlock.currentSeenCount,
-            echoUnlock.requiredSeenCount,
-          )
-        ) : (
-          <EchoLink pool={seen} />
-        );
+        if (!echoUnlocked && echoUnlock) {
+          return brief(4, {
+            locked: true,
+            seenCount: echoUnlock.currentSeenCount,
+            requiredCount: echoUnlock.requiredSeenCount,
+          });
+        }
+        return armedStep === 4 ? <EchoLink pool={seen} /> : brief(4, { poolCount: seenCount });
       case 5:
+        if (armedStep !== 5) {
+          return brief(5, { poolCount: playableKanji.length, poolLabel: "كانجي متاح" });
+        }
         return (
           <div className="flex h-full min-h-0 flex-col gap-3">
             {playableKanji.length > 0 && (
@@ -529,59 +556,67 @@ export default function DojoContent({
           </div>
         );
       case 6:
-        return !listenUnlocked && listenUnlock ? (
-          lockedStep(
-            listenUnlock.titleAr,
-            "يتطلب مراجعة مفردات كافية في هذا القطاع قبل فتح سباق السرعة — ولن تُدرَج إلا كلمات رأيتها.",
-            listenUnlock.currentSeenCount,
-            listenUnlock.requiredSeenCount,
-          )
-        ) : (
+        if (!listenUnlocked && listenUnlock) {
+          return brief(6, {
+            locked: true,
+            seenCount: listenUnlock.currentSeenCount,
+            requiredCount: listenUnlock.requiredSeenCount,
+          });
+        }
+        return armedStep === 6 ? (
           <ListeningLab
             pool={seen}
             onFinish={() => completeStep("انتهى السباق الصوتي — انتقال تلقائي")}
           />
+        ) : (
+          brief(6, { poolCount: seenCount })
         );
       case 7:
-        return !sovUnlocked && sovUnlock ? (
-          lockedStep(
-            sovUnlock.titleAr,
-            "رتّب مقاطع الجملة بنظامها النحوي (فاعل/مبتدأ → مفعول/حرف جر → فعل). يتطلب مفردات مُراجَعة من القطاع الأول.",
-            sovUnlock.currentSeenCount,
-            sovUnlock.requiredSeenCount,
-          )
-        ) : (
+        if (!sovUnlocked && sovUnlock) {
+          return brief(7, {
+            locked: true,
+            seenCount: sovUnlock.currentSeenCount,
+            requiredCount: sovUnlock.requiredSeenCount,
+          });
+        }
+        return armedStep === 7 ? (
           <SovAssembly
             pool={seen}
             onFinish={() => completeStep("اكتمل التركيب — انتقال تلقائي")}
           />
+        ) : (
+          brief(7, { poolCount: seenCount })
         );
       case 8:
-        return !grammarUnlocked && grammarUnlock ? (
-          lockedStep(
-            grammarUnlock.titleAr,
-            "مرجع الجُزرة النحوية المتقدّم — يفتح بعد بناء رصيد كافٍ من المفردات في هذا القطاع.",
-            grammarUnlock.currentSeenCount,
-            grammarUnlock.requiredSeenCount,
-          )
-        ) : (
+        if (!grammarUnlocked && grammarUnlock) {
+          return brief(8, {
+            locked: true,
+            seenCount: grammarUnlock.currentSeenCount,
+            requiredCount: grammarUnlock.requiredSeenCount,
+          });
+        }
+        return armedStep === 8 ? (
           <div className="flex h-full min-h-0 flex-col">
             <IrabReference entries={IRAB_SEED} />
           </div>
+        ) : (
+          brief(8)
         );
       case 9:
-        return !taikoUnlocked && taikoUnlock ? (
-          lockedStep(
-            taikoUnlock.titleAr,
-            "طبل المورا الإيقاعي — اضرب المركز للنغمة العالية والحافة للمنخفضة. يتطلب مفردات مُراجَعة في هذا القطاع.",
-            taikoUnlock.currentSeenCount,
-            taikoUnlock.requiredSeenCount,
-          )
-        ) : (
+        if (!taikoUnlocked && taikoUnlock) {
+          return brief(9, {
+            locked: true,
+            seenCount: taikoUnlock.currentSeenCount,
+            requiredCount: taikoUnlock.requiredSeenCount,
+          });
+        }
+        return armedStep === 9 ? (
           <MoraTaiko
             pool={seen}
             onFinish={() => completeStep("اكتمل طبل المورا — انتقال تلقائي")}
           />
+        ) : (
+          brief(9, { poolCount: seenCount })
         );
       default:
         return null;
@@ -631,10 +666,12 @@ export default function DojoContent({
       </header>
 
       <div data-testid="dojo-carousel" className="screen-body">
-        <StageViewport expanded={stage.expanded} onCollapse={stage.collapse}>
+        <StageViewport expanded={stage.expanded} onCollapse={exitBriefing}>
         <div className="mb-2 flex items-center justify-between gap-2 border-b border-line pb-2">
           <span className="lang-ar telemetry-label text-cyan">{stepMeta.titleAr}</span>
-          <StageToggle expanded={stage.expanded} onToggle={stage.toggle} testId="dojo-expand" />
+          {armedStep === activeStep && (
+            <StageToggle expanded={stage.expanded} onToggle={exitBriefing} testId="dojo-exit" />
+          )}
         </div>
 
         <div
