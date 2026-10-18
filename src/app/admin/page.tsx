@@ -7,8 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/admin";
 import { DEFAULT_THEME, THEMES } from "@/lib/themes";
 import { THEME_NAMES } from "@/lib/theme-config";
+import { SECTORS } from "@/lib/curriculum";
+import { SECTOR_SKINS } from "@/lib/sector-skins";
 import { allDailyWords, dailyWordIndex, wordAt } from "@/lib/word-of-the-day";
 import { scanWotdImages } from "@/lib/wotd-images";
+import { scanSectorArt } from "@/lib/sector-art";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم | تعلّم اليابانية",
@@ -25,6 +28,16 @@ export default async function AdminPage() {
   if (!isAdmin(user.email)) notFound();
 
   const images = await scanWotdImages();
+  const sectorArt = await scanSectorArt();
+  const sectors = SECTORS.map((sector) => ({
+    id: sector.id,
+    order: sector.order,
+    titleAr: sector.titleAr,
+    taglineAr: sector.taglineAr,
+    themeAr: sector.themeAr,
+    accent: SECTOR_SKINS[sector.id].accent,
+    emblem: SECTOR_SKINS[sector.id].emblem,
+  }));
   const todayId = wordAt(dailyWordIndex()).id;
   const words = allDailyWords().map((word) => ({
     id: word.id,
@@ -41,7 +54,7 @@ export default async function AdminPage() {
       <div className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-6">
         <DashboardHeader
           titleAr="لوحة التحكم"
-          descAr="اضبط السمة الافتراضية وأسماء السمات، وأدر صور كلمة اليوم — تُحفظ الصور في مجلد المشروع."
+          descAr="اضبط السمة الافتراضية وأسماء السمات، وأدر صور كلمة اليوم وخلفيات القطاعات — تُحفظ الصور في مجلد المشروع."
           crumbs={[
             { href: "/", ar: "الرئيسية" },
             { href: "/admin", ar: "لوحة التحكم" },
@@ -58,6 +71,8 @@ export default async function AdminPage() {
           words={words}
           images={images}
           todayId={todayId}
+          sectors={sectors}
+          sectorArt={sectorArt}
         />
       </div>
     </AppShell>

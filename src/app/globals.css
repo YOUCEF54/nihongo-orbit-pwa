@@ -856,6 +856,67 @@ body {
 }
 
 /* ------------------------------------------------------------
+   Sector identity — one fixed accent per sector (sector-skins.ts)
+   plus optional admin-uploaded key-art. Set `--sector-accent`
+   (and `--sector-art`) inline, add `.sector-scope` to the wrapper,
+   then use the helpers below on any descendant.
+   ------------------------------------------------------------ */
+.sector-scope {
+  --sector-accent: var(--color-cyan);
+}
+.sector-text {
+  color: var(--sector-accent);
+}
+.sector-border {
+  border-color: color-mix(in srgb, var(--sector-accent) 42%, transparent);
+}
+.sector-border-strong {
+  border-color: color-mix(in srgb, var(--sector-accent) 88%, transparent);
+}
+.sector-bg-soft {
+  background-color: color-mix(in srgb, var(--sector-accent) 12%, transparent);
+}
+.sector-glow {
+  box-shadow: 0 0 18px color-mix(in srgb, var(--sector-accent) 32%, transparent);
+}
+.sector-emblem {
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--sector-accent) 45%, transparent);
+  background-color: color-mix(in srgb, var(--sector-accent) 14%, transparent);
+  color: var(--sector-accent);
+}
+/* Key-art wash — placed inside a `relative overflow-hidden` parent;
+   sibling content should be `relative` so it paints above the wash. */
+.sector-art {
+  position: absolute;
+  inset: 0;
+  background-image: var(--sector-art, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.52;
+  pointer-events: none;
+}
+.sector-art--fade {
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 92%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 110%);
+}
+/* Tint a primary button with the active sector accent. */
+.sector-cta {
+  --color-cyan: var(--sector-accent);
+  --brand-hi: color-mix(in srgb, var(--sector-accent) 68%, #ffffff);
+  --brand-lo: color-mix(in srgb, var(--sector-accent) 68%, #000000);
+}
+/* Tint a meter fill with the active sector accent. */
+.sector-fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--sector-accent) 62%, #000),
+    var(--sector-accent)
+  );
+}
+
+/* ------------------------------------------------------------
    Field
    ------------------------------------------------------------ */
 .field {

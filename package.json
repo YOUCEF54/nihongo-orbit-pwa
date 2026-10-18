@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "gen:wotd": "node scripts/gen-wotd-images.mjs",
-    "predev": "npm run gen:wotd",
-    "prebuild": "npm run gen:wotd"
+    "gen:sectors": "node scripts/gen-sector-art.mjs",
+    "predev": "npm run gen:wotd && npm run gen:sectors",
+    "prebuild": "npm run gen:wotd && npm run gen:sectors"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

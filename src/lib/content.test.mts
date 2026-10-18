@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { VOCAB_SEED } from "../data/vocab.seed.ts";
 import { KANJI_SEED, type SeedKanjiNode } from "../data/kanji.seed.ts";
 import { IRAB_SEED } from "../data/grammar.seed.ts";
+import { SENTENCE_SLOTS } from "../data/sentences.seed.ts";
 import { SECTORS } from "./curriculum.ts";
 import { getPitchAccentPattern } from "./pitch.ts";
 
@@ -44,6 +45,7 @@ test("vocab seed has whole content + matching pitch tables", () => {
     assert.ok(item.arabicTranslation.length > 0, `${item.id} empty translation`);
     assert.ok(item.partOfSpeechAr.length > 0, `${item.id} empty partOfSpeech`);
     assert.ok(item.exampleSentenceJp.length > 0, `${item.id} empty jp example`);
+    assert.ok(item.exampleSentenceRomaji.length > 0, `${item.id} empty romaji example`);
     assert.ok(item.exampleSentenceAr.length > 0, `${item.id} empty ar example`);
     const { pattern } = getPitchAccentPattern(
       item.hiragana ?? item.readingFurigana,
@@ -110,6 +112,18 @@ test("sector-1 vocab has id continuity (v1-001 … v1-030)", () => {
   });
 });
 
+test("sentence slots carry latin romaji readings", () => {
+  for (const [id, slots] of Object.entries(SENTENCE_SLOTS)) {
+    for (const entry of slots) {
+      assert.ok(entry.romaji.length > 0, `${id} slot "${entry.jp}" missing romaji`);
+      assert.ok(
+        !/[\u3040-\u30ff\u4e00-\u9fff]/.test(entry.romaji),
+        `${id} slot "${entry.jp}" romaji is not latin (${entry.romaji})`,
+      );
+    }
+  }
+});
+
 test("grammar seed entries are well-formed particles", () => {
   const ids = IRAB_SEED.map((entry) => entry.id);
   assert.equal(new Set(ids).size, ids.length, "duplicate grammar ids");
@@ -120,6 +134,7 @@ test("grammar seed entries are well-formed particles", () => {
     assert.ok(entry.roleAr.length > 0, `${entry.id} empty role`);
     assert.ok(entry.functionAr.length > 0, `${entry.id} empty function`);
     assert.ok(entry.exampleJp.length > 0, `${entry.id} empty example`);
+    assert.ok(entry.exampleRomaji.length > 0, `${entry.id} empty example romaji`);
     assert.ok(entry.exampleAr.length > 0, `${entry.id} empty translation`);
   }
 });

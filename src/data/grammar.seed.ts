@@ -7,6 +7,7 @@ export interface IrabEntry {
   roleAr: string;
   functionAr: string;
   exampleJp: string;
+  exampleRomaji: string;
   exampleAr: string;
   noteAr?: string;
 }
@@ -19,6 +20,7 @@ export const IRAB_SEED: IrabEntry[] = [
     roleAr: "المبتدأ",
     functionAr: "يفتتح الكلام على موضوع — ما يُحَدَّث عنه (مبتدأ الجملة).",
     exampleJp: "私は学生です。",
+    exampleRomaji: "watashi wa gakusei desu.",
     exampleAr: "أنا طالب.",
     noteAr: "يتّميز من «が»: «は» تُعرّف موضوع الجملة، لا فاعلها.",
   },
@@ -29,6 +31,7 @@ export const IRAB_SEED: IrabEntry[] = [
     roleAr: "الفاعل",
     functionAr: "تسمّي الفاعل، وتُشَدِّد عليه عند مقابلته بغيره.",
     exampleJp: "雨が降ります。",
+    exampleRomaji: "ame ga furimasu.",
     exampleAr: "تمطر السماء.",
     noteAr: "عند المماثلة — الآتي مع الجواب على السؤال — يظهر المعنى: «هو الفاعل لا غيره».",
   },
@@ -39,6 +42,7 @@ export const IRAB_SEED: IrabEntry[] = [
     roleAr: "المفعول به",
     functionAr: "تحدّد مسار الفعل المباشر — ما وقع عليه الفعل.",
     exampleJp: "水を飲みます。",
+    exampleRomaji: "mizu o nomimasu.",
     exampleAr: "أشرب الماء.",
   },
   {
@@ -48,6 +52,7 @@ export const IRAB_SEED: IrabEntry[] = [
     roleAr: "حرف الجرّ للغاية والزمان",
     functionAr: "تعبّر عن الوجهة والغاية (إلى/عند)، وميِّز لحظةَ الحدوث.",
     exampleJp: "学校に行きます。",
+    exampleRomaji: "gakkou ni ikimasu.",
     exampleAr: "أذهب إلى المدرسة.",
     noteAr: "إذا دخلت على زمان جاءت بمعنى «في»: 九時に起きます",
   },
@@ -58,6 +63,7 @@ export const IRAB_SEED: IrabEntry[] = [
     roleAr: "حرف الجرّ للمكان والوسيلة",
     functionAr: "تحدّد مكان الحدوث أو الوسيلة (بالـ/في).",
     exampleJp: "電車で行きます。",
+    exampleRomaji: "densha de ikimasu.",
     exampleAr: "أذهب بالقطار الكهربائي.",
   },
   {
@@ -67,6 +73,7 @@ export const IRAB_SEED: IrabEntry[] = [
     roleAr: "المضاف إليه",
     functionAr: "تربط الاسمين بالتعلّق والإضافة — مضاف ومضاف إليه.",
     exampleJp: "先生の本。",
+    exampleRomaji: "sensei no hon.",
     exampleAr: "كتاب المعلّم.",
   },
 ];

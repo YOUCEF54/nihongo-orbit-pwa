@@ -1,8 +1,9 @@
 /* ============================================================
    Dojo carousel step registry — one fullscreen activity per
-   step. Step 0 is the sector map (mission hub); selecting a
-   sector jumps to Step 1. Terminal `#hash` shortcuts resolve
-   to step indexes (no scroll anchors in carousel mode).
+   step. The sector map lives on its own hub route (`/practice`);
+   the carousel at `/practice/drill` only holds activities.
+   Terminal `#hash` shortcuts resolve to step indexes (no scroll
+   anchors in carousel mode).
 
    Each activity step renders an inline "brief" (desc/how-to)
    with a launch button; the activity itself only mounts once
@@ -10,7 +11,6 @@
    ============================================================ */
 
 export const DOJO_STEP_IDS = [
-  "map",
   "strokes",
   "scramble",
   "review",
@@ -48,14 +48,6 @@ export interface DojoStepMeta {
 }
 
 export const DOJO_STEPS: DojoStepMeta[] = [
-  {
-    id: "map",
-    titleAr: "خريطة القطاعات",
-    descAr: "حملاتك الميدانية موزّعة على قطاعات — اختر قطاعًا ثم ابدأ تدريباته.",
-    howToAr: "اضغط على قطاع لبدء حملته والانتقال إلى أول تدريب.",
-    ctaAr: "ابدأ الحملة",
-    icon: "orbit",
-  },
   {
     id: "strokes",
     titleAr: "معايرة مسارات الكتابة",

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import {
   IconArchive,
   IconBolt,
@@ -33,6 +33,8 @@ export default function ActivityBrief({
   requiredCount = 0,
   poolCount,
   poolLabel = "كلمات متاحة",
+  sectorAr,
+  sectorAccent,
   onStart,
   onNext,
 }: {
@@ -42,6 +44,8 @@ export default function ActivityBrief({
   requiredCount?: number;
   poolCount?: number;
   poolLabel?: string;
+  sectorAr?: string;
+  sectorAccent?: string;
   onStart?: () => void;
   onNext?: () => void;
 }) {
@@ -91,6 +95,20 @@ export default function ActivityBrief({
               <span className="telemetry text-amber" dir="ltr">
                 {seenCount}/{requiredCount}
               </span>
+            </span>
+          )}
+          {sectorAr && (
+            <span
+              className="chip sector-scope sector-border"
+              style={{ "--sector-accent": sectorAccent } as CSSProperties}
+            >
+              <span
+                aria-hidden="true"
+                className="h-2 w-2 rounded-full"
+                style={{ background: "var(--sector-accent)" }}
+              />
+              <span className="lang-ar">الحملة</span>
+              <span className="lang-ar sector-text">{sectorAr}</span>
             </span>
           )}
         </div>

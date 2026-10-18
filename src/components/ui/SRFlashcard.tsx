@@ -20,6 +20,7 @@ import ReadingStack from "./ReadingStack";
 export interface FlashcardSentence {
   jp: string;
   reading?: string;
+  romaji?: string;
   ar: string;
 }
 
@@ -109,7 +110,7 @@ export default function SRFlashcard({ data, onGrade, className }: SRFlashcardPro
           onClick={speakWord}
           aria-label="استمع إلى نطق الكلمة"
           title="استمع إلى النطق"
-          className="status-badge is-ok absolute end-5 top-5 z-10"
+          className="absolute end-5 top-5 z-10 grid h-9 w-9 place-items-center rounded-full border border-cyan/40 bg-void/70 text-cyan shadow-[0_0_12px_rgba(0,240,255,0.18)] transition hover:border-cyan/70 hover:bg-cyan/15 focus-visible:border-cyan focus-visible:outline-none"
         >
           <IconVolume className="h-4 w-4" />
         </button>
@@ -203,6 +204,11 @@ export default function SRFlashcard({ data, onGrade, className }: SRFlashcardPro
               <p className="mb-1 text-cream" dir="ltr">
                 <Ruby base={data.sentence.jp} reading={data.sentence.reading} />
               </p>
+              {data.sentence.romaji && (
+                <p className="telemetry mb-1 text-[11px] text-cyan/70" dir="ltr">
+                  {data.sentence.romaji}
+                </p>
+              )}
               <p className="text-muted">{data.sentence.ar}</p>
             </div>
           )}

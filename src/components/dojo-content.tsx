@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,21 +9,28 @@ import SRFlashcard, { type FlashcardData } from "@/components/ui/SRFlashcard";
 import {
   EmptyState,
   MiniCarousel,
+  RewardModal,
   StageToggle,
   StageViewport,
+  jadePayout,
   useStage,
 } from "@/components/ui";
 import ActivityBrief from "@/components/dojo/ActivityBrief";
-import { SECTORS, sectorById, SECTOR_ACCENT_CLASSES } from "@/lib/curriculum";
-import type { SectorId } from "@/types/curriculum";
-import { DOJO_STEPS, DOJO_STEP_COUNT, stepIndexForHash } from "@/lib/dojo-steps";
-import { cardStateLabel, cardStateOf, cardToMastery, createFsrsCard, dueInDays, masteryToCard, type Card } from "@/lib/fsrs";
+import { SECTORS, sectorById } from "@/lib/curriculum";
+import { SECTOR_SKINS, sectorStyle } from "@/lib/sector-skins";
+import { sectorArtUrl } from "@/lib/sector-art-manifest";
+import type { Sector, SectorId } from "@/types/curriculum";
+import { DOJO_STEPS, DOJO_STEP_COUNT, stepIndexForHash, type DojoStepId } from "@/lib/dojo-steps";
+import { cardStateLabel, cardStateOf, cardToMastery, createFsrsCard, masteryToCard, type Card } from "@/lib/fsrs";
 import { loadMasteryLocal, saveMasteryLocal } from "@/lib/mastery";
 import { noteReviewActivity } from "@/lib/progress-state";
 import { evaluateGameUnlocks, seenVocab } from "@/lib/game-access";
+import { progressForSector } from "@/lib/sector-progress";
+import { SECTOR_JADE_REWARD, useSectorState } from "@/lib/sector-state";
+import { awardArcadeJade } from "@/lib/starlight";
 import { useKanjivgStrokes, type StrokeSlot } from "@/lib/use-kanji-strokes";
 import { createClient } from "@/lib/supabase/client";
-import { kanjiBySector, sectorKanjiCount } from "@/lib/data";
+import { kanjiBySector } from "@/lib/data";
 import { IRAB_SEED } from "@/data/grammar.seed";
 import IrabReference from "@/components/grammar/IrabReference";
 import type { SeedKanjiNode, SeedVocabularyItem } from "@/lib/data";
@@ -36,6 +42,12 @@ export interface DojoContentProps {
   initialMastery: Record<string, UserMasteryState>;
   vocab: SeedVocabularyItem[];
   kanji: SeedKanjiNode[];
+}
+
+interface SectorReward {
+  sectorAr: string;
+  jade: number;
+  nextAr: string | null;
 }
 
 function scriptOf(text: string): ScriptType {
@@ -110,19 +122,19 @@ export default function DojoContent({
     return playableKanji.find((node) => node.sector === sector) ?? playableKanji[0];
   };
 
-  const [activeSector, setActiveSector] = useState<SectorId>("sector-0");
+  const sectorState = useSectorState(userId);
+  const activeSector = sectorState.active;
+
   const [deckIndex, setDeckIndex] = useState(0);
   const [matrixKanji, setMatrixKanji] = useState<SeedKanjiNode | null>(() =>
-    pickKanji("sector-0"),
+    pickKanji(activeSector),
   );
   const [chainsCompleted, setChainsCompleted] = useState(0);
-  const [mastery, setMastery] = useState<Record<string, UserMasteryState>>(() => ({
-    ...initialMastery,
-    ...loadMasteryLocal(userId),
-  }));
+  const [mastery, setMastery] = useState<Record<string, UserMasteryState>>(initialMastery);
   const [activeStep, setActiveStep] = useState(0);
-  const [armedStep, setArmedStep] = useState<number | null>(null);
+  const [armedStep, setArmedStep] = useState<DojoStepId | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [reward, setReward] = useState<SectorReward | null>(null);
   const mounted = useMounted();
   const stage = useStage();
   const masteriesUnavailableRef = useRef(false);
@@ -140,35 +152,6 @@ export default function DojoContent({
   );
   const activeKanji = useMemo(() => kanjiBySector(activeSector), [activeSector]);
 
-  // Per-sector review progress for the mission-deck grid (Step 0). A sector is
-  // only locked when it has neither vocabulary nor kanji — otherwise "V0 · K6"
-  // sectors like the compound-kanji one would wrongly read as unavailable.
-  const sectorSummaries = useMemo(
-    () =>
-      SECTORS.map((sector) => {
-        const items = vocab.filter((item) => item.sector === sector.id);
-        const now = new Date();
-        let reviewed = 0;
-        let due = 0;
-        for (const item of items) {
-          const state = mastery[item.id];
-          if (!state || state.reps <= 0) continue;
-          reviewed += 1;
-          if (dueInDays(masteryToCard(state), now) <= 0) due += 1;
-        }
-        const kanjiCount = sectorKanjiCount(sector.id);
-        return {
-          sector,
-          total: items.length,
-          reviewed,
-          due,
-          kanjiCount,
-          locked: items.length === 0 && kanjiCount === 0,
-        };
-      }),
-    [vocab, mastery],
-  );
-
   const seen = useMemo(() => seenVocab(sectorVocab, mastery), [sectorVocab, mastery]);
   const seenCount = seen.length;
   const unlocks = evaluateGameUnlocks(seenCount);
@@ -183,6 +166,11 @@ export default function DojoContent({
   const sovUnlocked = sovUnlock?.isUnlocked ?? false;
   const grammarUnlocked = grammarUnlock?.isUnlocked ?? false;
   const taikoUnlocked = taikoUnlock?.isUnlocked ?? false;
+
+  const switchableSectors = useMemo(
+    () => SECTORS.filter((sector) => vocab.some((item) => item.sector === sector.id)),
+    [vocab],
+  );
 
   const clearToastTimer = () => {
     if (toastTimerRef.current !== null) {
@@ -225,8 +213,9 @@ export default function DojoContent({
 
   useEffect(() => {
     const deepLinked = stepFromHash();
-    if (deepLinked !== null && deepLinked !== 0) {
-      void queueMicrotask(() => goTo(deepLinked));
+    const target = deepLinked ?? stepIndexForHash("#review");
+    if (target !== null && target !== 0) {
+      void queueMicrotask(() => goTo(target));
     }
     const onHash = () => {
       const index = stepIndexForHash(window.location.hash);
@@ -253,11 +242,22 @@ export default function DojoContent({
       typeof window !== "undefined" && window.localStorage.getItem(MASTERY_DB_FLAG) === "1";
   }, []);
 
-  // Each activity step shows an inline brief; the activity only mounts (and
-  // goes fullscreen) after the user launches it, and unmounts again on exit.
-  const startActivity = (index: number) => {
-    setArmedStep(index);
-    stage.expand();
+  // Server render can't see localStorage, so fold in any local mastery after
+  // hydration (deferred to a microtask to keep the effect body side-effect free).
+  useEffect(() => {
+    const local = loadMasteryLocal(userId);
+    if (Object.keys(local).length === 0) return;
+    void queueMicrotask(() => {
+      setMastery((prev) => ({ ...prev, ...local }));
+    });
+  }, [userId]);
+
+  // Each activity step shows an inline brief; the activity only mounts after
+  // the user launches it, and unmounts again on exit. The FSRS review mounts
+  // inline instead of taking over the fullscreen stage.
+  const startActivity = (id: DojoStepId) => {
+    setArmedStep(id);
+    if (id !== "review") stage.expand();
   };
 
   const exitBriefing = () => {
@@ -266,7 +266,7 @@ export default function DojoContent({
   };
 
   const selectSector = (id: SectorId) => {
-    setActiveSector(id);
+    sectorState.setActive(id);
     setDeckIndex(0);
     setMatrixKanji(pickKanji(id));
   };
@@ -305,6 +305,29 @@ export default function DojoContent({
     }
   };
 
+  // Next campaign sector (in curriculum order) that actually carries vocabulary.
+  const nextCampaignSector = (from: SectorId): Sector | null => {
+    const fromOrder = sectorById(from).order;
+    return (
+      SECTORS.find(
+        (sector) => sector.order > fromOrder && vocab.some((item) => item.sector === sector.id),
+      ) ?? null
+    );
+  };
+
+  /** On crossing the 80% threshold, grant the one-time Jade prize + celebrate. */
+  const maybeCompleteSector = (updated: Record<string, UserMasteryState>) => {
+    const progress = progressForSector(vocab, activeSector, updated);
+    if (!progress.isComplete) return;
+    if (!sectorState.markComplete(activeSector)) return;
+    awardArcadeJade(userId, SECTOR_JADE_REWARD);
+    setReward({
+      sectorAr: sectorById(activeSector).titleAr,
+      jade: SECTOR_JADE_REWARD,
+      nextAr: nextCampaignSector(activeSector)?.titleAr ?? null,
+    });
+  };
+
   const handleGrade = (id: string, _grade: ReviewGrade, next: Card) => {
     const item = cardToMastery(userId, id, "vocab", next);
     const updated = { ...mastery, [id]: item };
@@ -312,6 +335,7 @@ export default function DojoContent({
     saveMasteryLocal(userId, updated);
     noteReviewActivity(userId);
     void persist(item);
+    maybeCompleteSector(updated);
     if (deckIndex < sectorVocab.length - 1) {
       setDeckIndex((value) => value + 1);
     } else {
@@ -337,6 +361,7 @@ export default function DojoContent({
         audioUrl: currentWord.audioUrl,
         sentence: {
           jp: currentWord.exampleSentenceJp,
+          romaji: currentWord.exampleSentenceRomaji,
           ar: currentWord.exampleSentenceAr,
         },
         script: scriptOf(currentWord.japaneseText),
@@ -368,8 +393,10 @@ export default function DojoContent({
     }
   };
 
+  const sectorAr = sectorById(activeSector).titleAr;
+
   const brief = (
-    index: number,
+    id: DojoStepId,
     opts?: {
       locked?: boolean;
       seenCount?: number;
@@ -377,108 +404,40 @@ export default function DojoContent({
       poolCount?: number;
       poolLabel?: string;
     },
-  ) => (
-    <ActivityBrief
-      step={DOJO_STEPS[index]}
-      locked={opts?.locked}
-      seenCount={opts?.seenCount}
-      requiredCount={opts?.requiredCount}
-      poolCount={opts?.poolCount}
-      poolLabel={opts?.poolLabel}
-      onStart={() => startActivity(index)}
-      onNext={() => move(1)}
-    />
-  );
+  ) => {
+    const index = DOJO_STEPS.findIndex((step) => step.id === id);
+    return (
+      <ActivityBrief
+        step={DOJO_STEPS[index]}
+        locked={opts?.locked}
+        seenCount={opts?.seenCount}
+        requiredCount={opts?.requiredCount}
+        poolCount={opts?.poolCount}
+        poolLabel={opts?.poolLabel}
+        sectorAr={sectorAr}
+        sectorAccent={SECTOR_SKINS[activeSector].accent}
+        onStart={() => startActivity(id)}
+        onNext={() => move(1)}
+      />
+    );
+  };
 
-  const renderStep = (index: number) => {
-    switch (index) {
-      case 0:
-        return (
-          <div className="flex h-full min-h-0 flex-col">
-            <div className="grid flex-1 content-start gap-3 sm:grid-cols-2 lg:grid-cols-3" dir="rtl">
-              {sectorSummaries.map(({ sector, total, reviewed, due, kanjiCount, locked }) => {
-                const accent = SECTOR_ACCENT_CLASSES[sector.accent];
-                const active = sector.id === activeSector;
-                const pct = total > 0 ? Math.round((reviewed / total) * 100) : 0;
-                return (
-                  <button
-                    key={sector.id}
-                    type="button"
-                    disabled={locked}
-                    aria-current={active ? "true" : undefined}
-                    onClick={() => {
-                      selectSector(sector.id);
-                      goTo(1);
-                    }}
-                    style={{ "--chamfer-edge": accent.edge } as CSSProperties}
-                    className={[
-                      "flex flex-col gap-2 border p-3 text-end transition-all chamfer-border foil-overlay",
-                      accent.border,
-                      active ? "bg-white/5 shadow-[0_0_18px_color-mix(in_oklab,var(--color-cyan)_25%,transparent)]" : "bg-abyss/40 hover:bg-white/5",
-                      locked ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-                    ].join(" ")}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={["lang-ar text-xs font-bold", accent.text].join(" ")}>
-                        {sector.jlpt === "Pre-N5"
-                          ? `قطاع ${sector.order} · ما قبل N5`
-                          : `قطاع ${sector.order} · ${sector.jlpt}`}
-                      </span>
-                      {locked ? (
-                        <span className="lang-ar text-xs text-faint">قيد الإعداد</span>
-                      ) : (
-                        <span className="lang-ar text-xs text-amber">
-                          مفردات {total} · كانجي {kanjiCount}
-                        </span>
-                      )}
-                    </div>
-                    <span className="lang-ar text-base font-bold text-cream">{sector.titleAr}</span>
-                    <span className="lang-ar text-[11px] leading-relaxed text-muted">
-                      {sector.focusAr}
-                    </span>
-                    {!locked && (
-                      <div className="mt-auto flex flex-col gap-1.5 pt-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="lang-ar text-muted">
-                            {due > 0 ? `${due} للمراجعة` : "لا مراجعات مستحقة"}
-                          </span>
-                          <span className="telemetry text-faint" dir="ltr">
-                            {reviewed} / {total}
-                          </span>
-                        </div>
-                        <div className="meter">
-                          <div className="meter-fill" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span
-                          className={[
-                            "lang-ar text-xs font-bold",
-                            active ? "text-cyan" : accent.text,
-                          ].join(" ")}
-                        >
-                          {active ? "الحملة الحالية ✓" : "ابدأ الحملة ←"}
-                        </span>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        );
-      case 1:
-        return armedStep === 1 ? (
+  const renderStep = (stepId: DojoStepId) => {
+    switch (stepId) {
+      case "strokes":
+        return armedStep === "strokes" ? (
           <StrokeStarters />
         ) : (
-          brief(1, { poolCount: playableKanji.length, poolLabel: "كانجي متاح" })
+          brief("strokes", { poolCount: playableKanji.length, poolLabel: "كانجي متاح" })
         );
-      case 2:
-        return armedStep === 2 ? (
+      case "scramble":
+        return armedStep === "scramble" ? (
           <SyntaxScramble onFinish={() => completeStep("اكتمل قطار الجمل — انتقال تلقائي")} />
         ) : (
-          brief(2)
+          brief("scramble")
         );
-      case 3:
-        if (armedStep !== 3) return brief(3, { poolCount: sectorVocab.length });
+      case "review":
+        if (armedStep !== "review") return brief("review", { poolCount: sectorVocab.length });
         return deckData ? (
           <div className="flex h-full min-h-0 flex-col">
             <SRFlashcard data={deckData} onGrade={(g, next) => handleGrade(currentWord.id, g, next)} />
@@ -500,18 +459,18 @@ export default function DojoContent({
         ) : (
           <EmptyState descAr="لا توجد بطاقات في هذا القطاع بعد — يتم إطلاق المحتوى على دفعات." />
         );
-      case 4:
+      case "pitch":
         if (!echoUnlocked && echoUnlock) {
-          return brief(4, {
+          return brief("pitch", {
             locked: true,
             seenCount: echoUnlock.currentSeenCount,
             requiredCount: echoUnlock.requiredSeenCount,
           });
         }
-        return armedStep === 4 ? <EchoLink pool={seen} /> : brief(4, { poolCount: seenCount });
-      case 5:
-        if (armedStep !== 5) {
-          return brief(5, { poolCount: playableKanji.length, poolLabel: "كانجي متاح" });
+        return armedStep === "pitch" ? <EchoLink pool={seen} /> : brief("pitch", { poolCount: seenCount });
+      case "matrix":
+        if (armedStep !== "matrix") {
+          return brief("matrix", { poolCount: playableKanji.length, poolLabel: "كانجي متاح" });
         }
         return (
           <div className="flex h-full min-h-0 flex-col gap-3">
@@ -555,68 +514,68 @@ export default function DojoContent({
             )}
           </div>
         );
-      case 6:
+      case "listen":
         if (!listenUnlocked && listenUnlock) {
-          return brief(6, {
+          return brief("listen", {
             locked: true,
             seenCount: listenUnlock.currentSeenCount,
             requiredCount: listenUnlock.requiredSeenCount,
           });
         }
-        return armedStep === 6 ? (
+        return armedStep === "listen" ? (
           <ListeningLab
             pool={seen}
             onFinish={() => completeStep("انتهى السباق الصوتي — انتقال تلقائي")}
           />
         ) : (
-          brief(6, { poolCount: seenCount })
+          brief("listen", { poolCount: seenCount })
         );
-      case 7:
+      case "assemble":
         if (!sovUnlocked && sovUnlock) {
-          return brief(7, {
+          return brief("assemble", {
             locked: true,
             seenCount: sovUnlock.currentSeenCount,
             requiredCount: sovUnlock.requiredSeenCount,
           });
         }
-        return armedStep === 7 ? (
+        return armedStep === "assemble" ? (
           <SovAssembly
             pool={seen}
             onFinish={() => completeStep("اكتمل التركيب — انتقال تلقائي")}
           />
         ) : (
-          brief(7, { poolCount: seenCount })
+          brief("assemble", { poolCount: seenCount })
         );
-      case 8:
+      case "grammar":
         if (!grammarUnlocked && grammarUnlock) {
-          return brief(8, {
+          return brief("grammar", {
             locked: true,
             seenCount: grammarUnlock.currentSeenCount,
             requiredCount: grammarUnlock.requiredSeenCount,
           });
         }
-        return armedStep === 8 ? (
+        return armedStep === "grammar" ? (
           <div className="flex h-full min-h-0 flex-col">
             <IrabReference entries={IRAB_SEED} />
           </div>
         ) : (
-          brief(8)
+          brief("grammar")
         );
-      case 9:
+      case "taiko":
         if (!taikoUnlocked && taikoUnlock) {
-          return brief(9, {
+          return brief("taiko", {
             locked: true,
             seenCount: taikoUnlock.currentSeenCount,
             requiredCount: taikoUnlock.requiredSeenCount,
           });
         }
-        return armedStep === 9 ? (
+        return armedStep === "taiko" ? (
           <MoraTaiko
             pool={seen}
             onFinish={() => completeStep("اكتمل طبل المورا — انتقال تلقائي")}
           />
         ) : (
-          brief(9, { poolCount: seenCount })
+          brief("taiko", { poolCount: seenCount })
         );
       default:
         return null;
@@ -634,18 +593,38 @@ export default function DojoContent({
         <span className="telemetry text-faint" dir="ltr">
           /
         </span>
-        <span className="lang-ar font-bold text-cyan">الدوجو</span>
+        <Link href="/practice" className="lang-ar text-faint transition hover:text-cyan">
+          خريطة القطاعات
+        </Link>
+        <span className="telemetry text-faint" dir="ltr">
+          /
+        </span>
+        <span className="lang-ar font-bold text-cyan">غرفة التدريبات</span>
       </nav>
-      <header className="mb-2 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="lang-ar text-xl font-bold text-cream">
-            حلبة التعلّم الميدان {sectorById(activeSector).order + 1}
-          </h1>
-          <p className="lang-ar mt-0.5 text-xs text-muted">
-            {sectorById(activeSector).titleAr} — {sectorById(activeSector).taglineAr}
-          </p>
+      <header
+        className="sector-scope relative mb-2 flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-2xl border sector-border bg-abyss/40 p-3"
+        style={sectorStyle(activeSector, sectorArtUrl(activeSector))}
+      >
+        {sectorArtUrl(activeSector) ? (
+          <span aria-hidden="true" className="sector-art sector-art--fade" />
+        ) : null}
+        <div className="relative flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="sector-emblem h-10 w-10 flex-none rounded-xl font-jp text-lg font-bold"
+          >
+            {SECTOR_SKINS[activeSector].emblem}
+          </span>
+          <div>
+            <h1 className="lang-ar text-xl font-bold text-cream">
+              حلبة التعلّم الميدان {sectorById(activeSector).order + 1}
+            </h1>
+            <p className="lang-ar mt-0.5 text-xs text-muted">
+              <span className="sector-text">{sectorAr}</span> — {sectorById(activeSector).taglineAr}
+            </p>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="relative flex gap-2">
           <span className="hud-pill">
             <span className="lang-ar telemetry-label">بنك المفردات</span>
             <span className="font-mono text-frequency">{sectorVocab.length}</span>
@@ -665,13 +644,47 @@ export default function DojoContent({
         </div>
       </header>
 
+      {switchableSectors.length > 1 && (
+        <div className="mb-2">
+          <MiniCarousel
+            testId="sector-switcher"
+            chipTestId="sector-switch"
+            ariaLabel="اختر القطاع النشط"
+            activeId={activeSector}
+            onSelect={(id) => selectSector(id as SectorId)}
+            items={switchableSectors.map((sector) => ({
+              id: sector.id,
+              ariaLabel: sector.titleAr,
+              render: () => (
+                <span className="lang-ar flex items-center gap-1.5 text-xs">
+                  <span className="telemetry text-faint" dir="ltr">
+                    {sector.order}
+                  </span>
+                  {sector.titleAr}
+                </span>
+              ),
+            }))}
+          />
+        </div>
+      )}
+
       <div data-testid="dojo-carousel" className="screen-body">
         <StageViewport expanded={stage.expanded} onCollapse={exitBriefing}>
         <div className="mb-2 flex items-center justify-between gap-2 border-b border-line pb-2">
           <span className="lang-ar telemetry-label text-cyan">{stepMeta.titleAr}</span>
-          {armedStep === activeStep && (
-            <StageToggle expanded={stage.expanded} onToggle={exitBriefing} testId="dojo-exit" />
-          )}
+          {armedStep === stepMeta.id &&
+            (stepMeta.id === "review" ? (
+              <button
+                type="button"
+                data-testid="dojo-exit"
+                onClick={exitBriefing}
+                className="btn-ghost px-3 py-1"
+              >
+                <span className="lang-ar">رجوع</span>
+              </button>
+            ) : (
+              <StageToggle expanded={stage.expanded} onToggle={exitBriefing} testId="dojo-exit" />
+            ))}
         </div>
 
         <div
@@ -698,7 +711,7 @@ export default function DojoContent({
                 }}
                 className="absolute inset-0 h-full min-h-0 overflow-clip transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
               >
-                {renderStep(index)}
+                {renderStep(step.id)}
               </div>
             );
           })}
@@ -776,6 +789,25 @@ export default function DojoContent({
           </motion.div>
         ) : null}
       </AnimatePresence>
+
+      <RewardModal
+        open={reward !== null}
+        onClose={() => setReward(null)}
+        titleAr="اكتملت الحملة"
+        payouts={reward ? [jadePayout(reward.jade)] : []}
+        note={
+          reward ? (
+            <div className="flex flex-col gap-2 text-center">
+              <p className="lang-ar text-sm font-bold text-amber">{reward.sectorAr}</p>
+              <p className="lang-ar text-xs leading-relaxed text-muted">
+                {reward.nextAr
+                  ? `الحملة التالية جاهزة: ${reward.nextAr}`
+                  : "أكملت كل القطاعات المتاحة — دفعات جديدة قادمة."}
+              </p>
+            </div>
+          ) : null
+        }
+      />
     </div>
   );
 }

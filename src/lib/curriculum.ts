@@ -1,4 +1,4 @@
-import type { Sector, SectorAccent, SectorId } from "@/types/curriculum";
+import type { Sector, SectorId } from "@/types/curriculum";
 
 export const SECTORS: Sector[] = [
   {
@@ -82,44 +82,3 @@ const SECTOR_BY_ID: Record<SectorId, Sector> = Object.fromEntries(
 export function sectorById(id: SectorId): Sector {
   return SECTOR_BY_ID[id];
 }
-
-export const SECTOR_ACCENT_CLASSES: Record<
-  SectorAccent,
-  { text: string; border: string; edge: string; bgSoft: string; chip: string }
-> = {
-  cyan: {
-    text: "text-cyan",
-    border: "border-cyan/40",
-    edge: "color-mix(in srgb, var(--color-cyan) 40%, transparent)",
-    bgSoft: "bg-cyan/10",
-    chip: "is-cyan",
-  },
-  frequency: {
-    text: "text-frequency",
-    border: "border-frequency/40",
-    edge: "color-mix(in srgb, var(--color-frequency) 40%, transparent)",
-    bgSoft: "bg-frequency/10",
-    chip: "is-cyan",
-  },
-  gold: {
-    text: "text-amber",
-    border: "border-amber/40",
-    edge: "color-mix(in srgb, var(--color-amber) 40%, transparent)",
-    bgSoft: "bg-amber/10",
-    chip: "is-gold",
-  },
-  amethyst: {
-    text: "text-amethyst",
-    border: "border-amethyst/40",
-    edge: "color-mix(in srgb, var(--color-amethyst) 40%, transparent)",
-    bgSoft: "bg-amethyst/10",
-    chip: "is-amethyst",
-  },
-  void: {
-    text: "text-cream",
-    border: "border-line",
-    edge: "var(--color-line)",
-    bgSoft: "bg-white/5",
-    chip: "",
-  },
-};

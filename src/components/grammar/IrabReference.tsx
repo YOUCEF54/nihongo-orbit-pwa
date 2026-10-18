@@ -31,6 +31,9 @@ export default function IrabReference({ entries }: IrabReferenceProps) {
               <p className="font-jp text-lg leading-relaxed text-frequency" dir="ltr">
                 {entry.exampleJp}
               </p>
+              <p className="telemetry mt-0.5 text-xs text-cyan/70" dir="ltr">
+                {entry.exampleRomaji}
+              </p>
               <p className="lang-ar mt-1 text-xs text-muted">{entry.exampleAr}</p>
             </div>
             {entry.noteAr && (

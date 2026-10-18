@@ -34,6 +34,8 @@ export interface KanjiNode {
 export interface SentenceSlot {
   /** Japanese chunk including its particle, e.g. "花を". */
   jp: string;
+  /** Hepburn-style reading of `jp`, e.g. "hana o". */
+  romaji: string;
   /** Lexeme without the trailing particle, e.g. "花". */
   chunk: string;
   /** Trailing particle (は/が/を/に/で/へ/の…) if any. */
@@ -63,6 +65,7 @@ export interface VocabularyItem {
       via `getPitchAccentPattern`; kept for audio/TTS and rendering. */
   pitchAccentPattern: PitchState[];
   exampleSentenceJp: string;
+  exampleSentenceRomaji: string;
   exampleSentenceAr: string;
   audioUrl: string | null;
   /** SOV-assembly slots tagged with Arabic case markers (populated for

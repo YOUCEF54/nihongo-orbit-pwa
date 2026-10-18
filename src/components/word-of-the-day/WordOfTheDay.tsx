@@ -143,7 +143,7 @@ export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }
 
                 <div
                   data-testid="wotd-hero"
-                  className="relative flex h-48 w-full items-center justify-center overflow-hidden bg-gradient-to-br from-cyan/10 to-transparent"
+                  className="relative flex h-55 w-full items-center justify-center overflow-hidden bg-linear-to-br from-cyan/10 to-transparent"
                 >
                   {imageUrl ? (
                     <Image
@@ -171,7 +171,7 @@ export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }
                   )}
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-void via-void/70 to-transparent"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 via-3\60%  to-transparent"
                   />
                 <span className="lang-ar absolute bottom-3 end-3 z-10 flex items-center gap-1.5 rounded-full border border-cyan/30 bg-void/60 px-3 py-1.5 text-xs font-bold text-cyan backdrop-blur-md">
                   <IconSpark className="h-3 w-3" />
@@ -234,6 +234,14 @@ export default function WordOfTheDay({ initialIndex }: { initialIndex?: number }
                       style={{ textAlign: "left" }}
                     >
                       {word.example.jp}
+                    </p>
+                    <p
+                      data-testid="wotd-example-romaji"
+                      className="telemetry mt-1 text-xs text-cyan/70"
+                      dir="ltr"
+                      style={{ textAlign: "left" }}
+                    >
+                      {word.example.romaji}
                     </p>
                     <p
                       data-testid="wotd-example-ar"

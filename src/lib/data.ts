@@ -34,6 +34,7 @@ function toVocabularyItem(item: SeedVocabularyItem): VocabularyItem {
     accent_nucleus: item.accent_nucleus,
     pitchAccentPattern: pattern,
     exampleSentenceJp: item.exampleSentenceJp,
+    exampleSentenceRomaji: item.exampleSentenceRomaji,
     exampleSentenceAr: item.exampleSentenceAr,
     audioUrl: item.audioUrl,
     slots_ar: item.slots_ar,

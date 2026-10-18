@@ -358,6 +358,9 @@ export default function EchoLink({
               <span className="font-jp mt-1 block text-faint" dir="ltr">
                 {item.exampleSentenceJp}
               </span>
+              <span className="telemetry mt-0.5 block text-[10px] text-cyan/70" dir="ltr">
+                {item.exampleSentenceRomaji}
+              </span>
             </div>
           </div>
         )}

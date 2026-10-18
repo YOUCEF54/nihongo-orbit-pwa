@@ -17,7 +17,7 @@ test("terminal routes are unique and target real anchors or pages", () => {
   assert.equal(new Set(ids).size, ids.length, "duplicate terminal ids");
   for (const route of TERMINAL_ROUTES) {
     assert.ok(
-      route.href.startsWith("/practice#") || route.href === "/games",
+      route.href.startsWith("/practice/drill#") || route.href === "/games",
       `${route.id} unexpected href ${route.href}`,
     );
   }
@@ -36,7 +36,7 @@ test("orphan dojo sections have terminal shortlinks", () => {
   const hrefs = TERMINAL_ROUTES.map((route) => route.href);
   for (const anchor of ["#review", "#pitch", "#matrix", "#listen", "#taiko", "#assemble", "#grammar"]) {
     assert.ok(
-      hrefs.includes(`/practice${anchor}`),
+      hrefs.includes(`/practice/drill${anchor}`),
       `missing terminal shortlink for ${anchor}`,
     );
   }

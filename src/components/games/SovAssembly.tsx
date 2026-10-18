@@ -195,6 +195,7 @@ export default function SovAssembly({
               ].join(" ")}
             >
               <span className="font-jp text-base text-cream">{entry.jp}</span>
+              <span className="telemetry text-[9px] text-cyan/70">{entry.romaji}</span>
               <span className="lang-ar text-[10px]">{entry.caseAr}</span>
             </button>
           ))
@@ -218,6 +219,7 @@ export default function SovAssembly({
               ].join(" ")}
             >
               <span className="font-jp text-base text-cream">{entry.jp}</span>
+              <span className="telemetry text-[9px] text-cyan/70">{entry.romaji}</span>
               <span className="lang-ar text-[10px] text-muted">{entry.caseAr}</span>
             </button>
           ))}

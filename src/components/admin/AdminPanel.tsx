@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ReadingStack } from "@/components/ui";
 import ImageCropDialog from "@/components/admin/ImageCropDialog";
+import SectorSkinPreview from "@/components/admin/SectorSkinPreview";
 
 interface AdminTheme {
   id: string;
@@ -22,6 +23,16 @@ interface AdminWord {
   art: string | null;
 }
 
+interface AdminSector {
+  id: string;
+  order: number;
+  titleAr: string;
+  taglineAr: string;
+  themeAr: string;
+  accent: string;
+  emblem: string;
+}
+
 interface Props {
   themes: AdminTheme[];
   defaultId: string;
@@ -30,7 +41,11 @@ interface Props {
   images: Record<string, string>;
   /** Word shown on the home dashboard today — pinned first + highlighted. */
   todayId: string;
+  sectors: AdminSector[];
+  sectorArt: Record<string, string>;
 }
+
+type CropTarget = { kind: "word" | "sector"; id: string; file: File; url: string };
 
 const ERROR_AR: Record<string, string> = {
   forbidden: "غير مصرّح بالوصول",
@@ -38,6 +53,7 @@ const ERROR_AR: Record<string, string> = {
   bad_size: "حجم الصورة كبير جدًا (الحد ٢ ميغابايت).",
   not_webp: "تعذّر تحويل الصورة إلى صيغة الويب.",
   unknown_word: "كلمة غير معروفة.",
+  unknown_sector: "قطاع غير معروف.",
   missing_file: "لم يتم اختيار صورة.",
   bad_request: "طلب غير صالح.",
 };
@@ -46,9 +62,18 @@ function message(code: string): string {
   return ERROR_AR[code] ?? "حدث خطأ غير متوقّع.";
 }
 
-export default function AdminPanel({ themes, defaultId, names, words, images, todayId }: Props) {
+export default function AdminPanel({
+  themes,
+  defaultId,
+  names,
+  words,
+  images,
+  todayId,
+  sectors,
+  sectorArt,
+}: Props) {
   const router = useRouter();
-  const [tab, setTab] = useState<"themes" | "words">("themes");
+  const [tab, setTab] = useState<"themes" | "words" | "sectors">("themes");
 
   const [defaultTheme, setDefaultTheme] = useState(defaultId);
   const [nameState, setNameState] = useState<Record<string, string>>(() => {
@@ -66,13 +91,17 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
   const [busy, setBusy] = useState<string | null>(null);
   const [wordError, setWordError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [crop, setCrop] = useState<{ id: string; file: File; url: string } | null>(null);
+  const [crop, setCrop] = useState<CropTarget | null>(null);
 
-  const openCrop = (id: string, file: File) => {
+  const [sectorImages, setSectorImages] = useState<Record<string, string>>(sectorArt);
+  const [sectorBusy, setSectorBusy] = useState<string | null>(null);
+  const [sectorError, setSectorError] = useState<string | null>(null);
+
+  const openCrop = (kind: CropTarget["kind"], id: string, file: File) => {
     const url = URL.createObjectURL(file);
     setCrop((prev) => {
       if (prev) URL.revokeObjectURL(prev.url);
-      return { id, file, url };
+      return { kind, id, file, url };
     });
   };
 
@@ -142,9 +171,11 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
   };
 
   const confirmCrop = (blob: Blob) => {
-    const id = crop?.id;
+    const target = crop;
     closeCrop();
-    if (id) void uploadBlob(id, blob);
+    if (!target) return;
+    if (target.kind === "sector") void uploadSector(target.id, blob);
+    else void uploadBlob(target.id, blob);
   };
 
   const remove = async (id: string) => {
@@ -168,7 +199,51 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
     }
   };
 
+  const uploadSector = async (id: string, blob: Blob) => {
+    setSectorBusy(id);
+    setSectorError(null);
+    try {
+      const form = new FormData();
+      form.append("sectorId", id);
+      form.append("file", blob, `${id}.webp`);
+      const res = await fetch("/api/admin/sector-art", { method: "POST", body: form });
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        images?: Record<string, string>;
+      };
+      if (!res.ok) throw new Error(body.error ?? "bad_request");
+      setSectorImages(body.images ?? sectorImages);
+      setStamp((prev) => ({ ...prev, [id]: Date.now() }));
+    } catch (error) {
+      setSectorError(message(error instanceof Error ? error.message : ""));
+    } finally {
+      setSectorBusy(null);
+    }
+  };
+
+  const removeSector = async (id: string) => {
+    setSectorBusy(id);
+    setSectorError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/sector-art?sectorId=${encodeURIComponent(id)}`,
+        { method: "DELETE" },
+      );
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        images?: Record<string, string>;
+      };
+      if (!res.ok) throw new Error(body.error ?? "bad_request");
+      setSectorImages(body.images ?? sectorImages);
+    } catch (error) {
+      setSectorError(message(error instanceof Error ? error.message : ""));
+    } finally {
+      setSectorBusy(null);
+    }
+  };
+
   const covered = words.filter((word) => imageMap[word.id]).length;
+  const coveredSectors = sectors.filter((sector) => sectorImages[sector.id]).length;
 
   return (
     <div>
@@ -200,6 +275,20 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
           }`}
         >
           صور كلمة اليوم
+        </button>
+        <button
+          type="button"
+          role="tab"
+          data-testid="admin-tab-sectors"
+          aria-selected={tab === "sectors"}
+          onClick={() => setTab("sectors")}
+          className={`rounded-full border px-4 py-2 text-sm font-bold transition ${
+            tab === "sectors"
+              ? "border-cyan/50 bg-cyan/10 text-cyan"
+              : "border-line text-muted hover:text-cream"
+          }`}
+        >
+          قطاعات
         </button>
       </div>
 
@@ -271,7 +360,7 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
             </div>
           </div>
         </section>
-      ) : (
+      ) : tab === "words" ? (
         <section data-testid="admin-words">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <input
@@ -384,7 +473,7 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
                             const file = event.target.files?.[0];
                             event.target.value = "";
                             if (file) {
-                              openCrop(word.id, file);
+                              openCrop("word", word.id, file);
                             }
                           }}
                         />
@@ -407,12 +496,88 @@ export default function AdminPanel({ themes, defaultId, names, words, images, to
             })}
           </div>
         </section>
+      ) : (
+        <section data-testid="admin-sectors">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="lang-ar max-w-md text-xs leading-relaxed text-muted">
+              امنح كل قطاع صورة خلفية خاصة به. اللون والرمز يتبعان هوية القطاع الثابتة، وتظهر الصورة
+              كخلفية في بطاقة الحملة وملفها ورأس غرفة التدريبات.
+            </p>
+            <span className="telemetry text-xs text-faint" dir="ltr">
+              {coveredSectors}/{sectors.length} IMG
+            </span>
+          </div>
+
+          {sectorError ? (
+            <p data-testid="admin-sectors-error" className="lang-ar mb-3 text-sm text-danger">
+              {sectorError}
+            </p>
+          ) : null}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {sectors.map((sector) => {
+              const url = sectorImages[sector.id];
+              const isBusy = sectorBusy === sector.id;
+              return (
+                <div
+                  key={sector.id}
+                  data-testid={`sector-art-card-${sector.id}`}
+                  className="panel"
+                >
+                  <div className="panel-body space-y-3">
+                    <SectorSkinPreview
+                      titleAr={sector.titleAr}
+                      taglineAr={sector.taglineAr}
+                      themeAr={sector.themeAr}
+                      accent={sector.accent}
+                      emblem={sector.emblem}
+                      art={url ? `${url}?v=${stamp[sector.id] ?? 0}` : null}
+                    />
+                    <div className="flex items-center gap-2">
+                      <label
+                        data-testid={`sector-upload-${sector.id}`}
+                        className={`btn-cyan cursor-pointer text-xs ${
+                          isBusy ? "pointer-events-none opacity-50" : ""
+                        }`}
+                      >
+                        <span className="lang-ar">
+                          {isBusy ? "جارٍ الرفع…" : url ? "تغيير الصورة" : "رفع صورة"}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            event.target.value = "";
+                            if (file) openCrop("sector", sector.id, file);
+                          }}
+                        />
+                      </label>
+                      {url ? (
+                        <button
+                          type="button"
+                          data-testid={`sector-remove-${sector.id}`}
+                          onClick={() => void removeSector(sector.id)}
+                          disabled={isBusy}
+                          className="btn-ghost text-xs disabled:opacity-50"
+                        >
+                          <span className="lang-ar">إزالة</span>
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       {crop ? (
         <ImageCropDialog
           src={crop.url}
-          busy={busy === crop.id}
+          busy={crop.kind === "sector" ? sectorBusy === crop.id : busy === crop.id}
           onCancel={closeCrop}
           onConfirm={confirmCrop}
         />

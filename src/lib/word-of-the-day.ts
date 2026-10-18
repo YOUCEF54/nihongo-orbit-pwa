@@ -17,7 +17,7 @@ export interface DailyWord {
   categoryAr: string;
   /** Sector/JLPT chip, e.g. "القطاع 1 · N5". */
   sectorLabelAr: string;
-  example: { jp: string; ar: string };
+  example: { jp: string; romaji: string; ar: string };
   audioUrl: string | null;
   /** Optional illustrative art (emoji) when the word has a clear visual. */
   art: string | null;
@@ -75,7 +75,11 @@ function toDailyWord(item: SeedVocabularyItem): DailyWord {
     arabicTranslation: item.arabicTranslation,
     categoryAr: item.partOfSpeechAr,
     sectorLabelAr: `القطاع ${sector.order + 1} · ${sector.jlpt}`,
-    example: { jp: item.exampleSentenceJp, ar: item.exampleSentenceAr },
+    example: {
+      jp: item.exampleSentenceJp,
+      romaji: item.exampleSentenceRomaji,
+      ar: item.exampleSentenceAr,
+    },
     audioUrl: item.audioUrl ?? null,
     art: WORD_ART[item.id] ?? null,
   };

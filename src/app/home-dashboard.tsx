@@ -6,6 +6,11 @@ import { EnergyPanel, StarlightPanel, StreakPanel } from "@/components/ui";
 import WordOfTheDay from "@/components/word-of-the-day/WordOfTheDay";
 import { IconArchive, IconBolt, IconDojo, IconSpark, IconTrophy, IconOrbit } from "@/components/icons";
 import { handleLabelFor } from "@/lib/shell";
+import { sectorById } from "@/lib/curriculum";
+import { SECTOR_SKINS, sectorStyle } from "@/lib/sector-skins";
+import { sectorArtUrl } from "@/lib/sector-art-manifest";
+import { useSectorState } from "@/lib/sector-state";
+import { useMounted } from "@/lib/use-mounted";
 import { dueInDays, masteryToCard } from "@/lib/fsrs";
 import { loadMasteryLocal } from "@/lib/mastery";
 import { initStreak, type StreakState } from "@/lib/gamification";
@@ -31,29 +36,33 @@ export default function HomeDashboard({
 }) {
   const handle = handleLabelFor(userEmail);
 
+  const mounted = useMounted();
   const mastery = useMemo(
-    () => ({ ...initialMastery, ...loadMasteryLocal(userId) }),
-    [initialMastery, userId],
+    () => (mounted ? { ...initialMastery, ...loadMasteryLocal(userId) } : initialMastery),
+    [mounted, initialMastery, userId],
   );
 
-  const sector1Vocab = useMemo(
-    () => VOCAB_SEED.filter((word) => word.sector === "sector-1"),
-    [],
+  const { active: activeSector } = useSectorState(userId);
+  const activeSectorTitle = sectorById(activeSector).titleAr;
+
+  const sectorVocab = useMemo(
+    () => VOCAB_SEED.filter((word) => word.sector === activeSector),
+    [activeSector],
   );
 
-  const deckSize = sector1Vocab.length;
+  const deckSize = sectorVocab.length;
   const reviewed = useMemo(
-    () => sector1Vocab.filter((word) => (mastery[word.id]?.reps ?? 0) > 0).length,
-    [mastery, sector1Vocab],
+    () => sectorVocab.filter((word) => (mastery[word.id]?.reps ?? 0) > 0).length,
+    [mastery, sectorVocab],
   );
   const dueToday = useMemo(() => {
     const now = new Date();
-    return sector1Vocab.filter((word) => {
+    return sectorVocab.filter((word) => {
       const state = mastery[word.id];
       if (!state || state.reps <= 0) return false;
       return dueInDays(masteryToCard(state), now) <= 0;
     }).length;
-  }, [mastery, sector1Vocab]);
+  }, [mastery, sectorVocab]);
   const freshCount = deckSize - reviewed;
   const masteredPct = deckSize > 0 ? Math.round((reviewed / deckSize) * 100) : 0;
 
@@ -87,7 +96,7 @@ export default function HomeDashboard({
               {greetingFor(new Date().getHours())}، {handle}!
             </h1>
             <p className="lang-ar mt-1 text-sm text-muted">
-              وجهة اليوم — أكمل مراجعات القطاع الأول راجع بجدولتك وواصِل رصيد أيام نشاطك.
+              وجهة اليوم — أكمل مراجعات قطاع «{activeSectorTitle}» بجدولتك وواصِل رصيد أيام نشاطك.
             </p>
           </div>
 
@@ -137,7 +146,7 @@ export default function HomeDashboard({
       {/* Quick actions */}
       <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
-          href="/practice#review"
+          href="/practice/drill#review"
           className="panel group transition hover:border-cyan/50 hover:shadow-[var(--glow-cyan)]"
         >
           <div className="panel-body">
@@ -151,7 +160,7 @@ export default function HomeDashboard({
         </Link>
 
         <Link
-          href="/practice#matrix"
+          href="/practice/drill#matrix"
           className="panel group transition hover:border-cyan/50 hover:shadow-[var(--glow-cyan)]"
         >
           <div className="panel-body">
@@ -165,7 +174,7 @@ export default function HomeDashboard({
         </Link>
 
         <Link
-          href="/practice#grammar"
+          href="/practice/drill#grammar"
           className="panel group transition hover:border-cyan/50 hover:shadow-[var(--glow-cyan)]"
         >
           <div className="panel-body">
@@ -179,15 +188,22 @@ export default function HomeDashboard({
         </Link>
 
         <Link
-          href="/games"
-          className="panel group transition hover:border-cyan/50 hover:shadow-[var(--glow-cyan)]"
+          href="/practice"
+          className="panel sector-scope group relative overflow-hidden transition"
+          style={sectorStyle(activeSector, sectorArtUrl(activeSector))}
         >
-          <div className="panel-body">
-            <IconOrbit className="h-6 w-6 text-cyan" />
-            <p className="lang-ar mt-3 font-extrabold text-cream">أركيد الألعاب</p>
-            <p className="lang-ar mt-1 text-xs text-muted">المعداد المداري وتوحيد الجذور — ألغاز الجذور</p>
-            <span className="chip is-cyan mt-4">
-              <span className="lang-ar">العب</span>
+          {sectorArtUrl(activeSector) ? (
+            <span aria-hidden="true" className="sector-art sector-art--fade" />
+          ) : null}
+          <div className="panel-body relative">
+            <IconOrbit className="h-6 w-6 sector-text" />
+            <p className="lang-ar mt-3 font-extrabold text-cream">خريطة القطاعات</p>
+            <p className="lang-ar mt-1 text-xs text-muted">حملات القطاعات وتقدّمك في كل قطاع</p>
+            <span className="chip sector-border sector-text mt-4">
+              <span aria-hidden="true" className="font-jp">
+                {SECTOR_SKINS[activeSector].emblem}
+              </span>
+              <span className="lang-ar">استعرِض</span>
             </span>
           </div>
         </Link>
@@ -195,17 +211,31 @@ export default function HomeDashboard({
 
       {/* Telemetry */}
       <section className="mb-4 grid gap-4 lg:grid-cols-[1fr_1.4fr]">
-        <div className="panel panel-body flex flex-col items-center justify-center gap-2 text-center">
-          <span className="telemetry-label lang-ar text-faint">تقدّم القطاع الأول</span>
-          <span className="font-display text-5xl font-extrabold text-cyan" dir="ltr">
+        <div
+          className="panel sector-scope panel-body relative flex flex-col items-center justify-center gap-2 overflow-hidden text-center"
+          style={sectorStyle(activeSector, sectorArtUrl(activeSector))}
+        >
+          {sectorArtUrl(activeSector) ? (
+            <span aria-hidden="true" className="sector-art sector-art--fade" />
+          ) : null}
+          <span className="relative lang-ar telemetry-label flex items-center gap-2 text-faint">
+            <span
+              aria-hidden="true"
+              className="sector-emblem h-5 w-5 rounded-md font-jp text-[10px] font-bold"
+            >
+              {SECTOR_SKINS[activeSector].emblem}
+            </span>
+            تقدّم {activeSectorTitle}
+          </span>
+          <span className="relative font-display text-5xl font-extrabold sector-text" dir="ltr">
             {reviewed}
             <span className="text-2xl text-faint"> / {deckSize}</span>
           </span>
-          <span className="lang-ar text-muted">
-            {masteredPct}% · القطاع الأول
+          <span className="lang-ar relative text-muted">
+            {masteredPct}% · {activeSectorTitle}
           </span>
-          <div className="meter mt-2 w-full">
-            <div className="meter-fill is-cyan" style={{ width: `${masteredPct}%` }} />
+          <div className="meter relative mt-2 w-full">
+            <div className="meter-fill sector-fill" style={{ width: `${masteredPct}%` }} />
           </div>
         </div>
         <div className="panel panel-body flex flex-col justify-center gap-3">

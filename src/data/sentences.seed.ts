@@ -16,8 +16,62 @@ function slot(
   caseEn: SentenceSlot["caseEn"],
   position: number,
 ): SentenceSlot {
-  return { jp, chunk, particle, caseAr, caseEn, position };
+  return { jp, romaji: SLOT_ROMAJI[jp] ?? chunk, chunk, particle, caseAr, caseEn, position };
 }
+
+/** Per-chunk readings (chunk + particle) so every chip is readable. */
+const SLOT_ROMAJI: Record<string, string> = {
+  "学校へ": "gakkou e",
+  "先生に": "sensei ni",
+  "鉛筆で": "enpitsu de",
+  "水を": "mizu o",
+  "海に": "umi ni",
+  "花を": "hana o",
+  "川を": "kawa o",
+  "山に": "yama ni",
+  "雨が": "ame ga",
+  "ご飯を": "gohan o",
+  "電車で": "densha de",
+  "空が": "sora ga",
+  "星が": "hoshi ga",
+  "本を": "hon o",
+  "日本に": "nihon ni",
+  "日本語を": "nihongo o",
+  "私は": "watashi wa",
+  "高い山に": "takai yama ni",
+  "家へ": "ie e",
+  "人が": "hito ga",
+  "音楽を": "ongaku o",
+  "音楽が": "ongaku ga",
+  "海が": "umi ga",
+  "魚を": "sakana o",
+  "肉を": "niku o",
+  "野菜を": "yasai o",
+  "町が": "machi ga",
+  "家に": "ie ni",
+  "天気が": "tenki ga",
+  "行きます": "ikimasu",
+  "聞きます": "kikimasu",
+  "書きます": "kakimasu",
+  "飲みます": "nomimasu",
+  "見ます": "mimasu",
+  "渡ります": "watarimasu",
+  "登ります": "noborimasu",
+  "降ります": "furimasu",
+  "食べます": "tabemasu",
+  "青いです": "aoi desu",
+  "光ります": "hikarimasu",
+  "読みます": "yomimasu",
+  "住んでいます": "sunde imasu",
+  "勉強します": "benkyou shimasu",
+  "学生です": "gakusei desu",
+  "来ます": "kimasu",
+  "好きです": "suki desu",
+  "買います": "kaimasu",
+  "美しいです": "utsukushii desu",
+  "います": "imasu",
+  "いいですね": "ii desu ne",
+};
 
 // Role shorthands for readability when authoring.
 const OBJECT = (jp: string, chunk: string, position: number): SentenceSlot =>

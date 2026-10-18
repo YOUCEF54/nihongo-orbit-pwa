@@ -6,9 +6,9 @@ import {
   stepIndexForHash,
 } from "./dojo-steps.ts";
 
-test("steps are unique, ordered, and start with the sector map", () => {
-  assert.equal(DOJO_STEP_COUNT, 10);
-  assert.equal(DOJO_STEPS[0].id, "map");
+test("steps are unique, ordered, and start with stroke starters", () => {
+  assert.equal(DOJO_STEP_COUNT, 9);
+  assert.equal(DOJO_STEPS[0].id, "strokes");
   assert.equal(DOJO_STEPS[DOJO_STEP_COUNT - 1].id, "taiko");
   assert.equal(new Set(DOJO_STEPS.map((step) => step.id)).size, DOJO_STEP_COUNT);
   for (const step of DOJO_STEPS) {

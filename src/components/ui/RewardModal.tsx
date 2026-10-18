@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconJade } from "@/components/icons";
 import { useDialogFocus } from "./use-dialog-focus";
@@ -28,6 +28,10 @@ interface RewardModalProps {
   glyph?: string;
   glyphAr?: string;
   payouts: RewardPayout[];
+  /** Heading override (defaults to the arcade solve copy). */
+  titleAr?: string;
+  /** Optional note rendered below the payout rows. */
+  note?: ReactNode;
 }
 
 export default function RewardModal({
@@ -36,6 +40,8 @@ export default function RewardModal({
   glyph,
   glyphAr,
   payouts,
+  titleAr = "مكافأة الحل",
+  note,
 }: RewardModalProps) {
   const escapeRef = useRef<() => void>(() => {});
   const dialogRef = useDialogFocus<HTMLDivElement>(open);
@@ -77,7 +83,7 @@ export default function RewardModal({
           )}
 
           <h2 id="reward-title" className="lang-ar mt-1 text-xl font-bold text-cream">
-            مكافأة الحل
+            {titleAr}
           </h2>
 
           <div className="mt-5 space-y-3">
@@ -101,6 +107,8 @@ export default function RewardModal({
               </div>
             ))}
           </div>
+
+          {note && <div className="mt-4">{note}</div>}
 
           <button
             type="button"

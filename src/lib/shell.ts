@@ -14,13 +14,13 @@ export const DOCK_ROUTES: ShellRoute[] = [
 ];
 
 export const TERMINAL_ROUTES: ShellRoute[] = [
-  { id: "review", ar: "المراجعة اليومية", href: "/practice#review", icon: "dojo" },
-  { id: "pitch", ar: "صدى المعاني", href: "/practice#pitch", icon: "wave" },
-  { id: "matrix", ar: "قاعة الكتابة", href: "/practice#matrix", icon: "archive" },
-  { id: "listen", ar: "سباق السرعة الصوتي", href: "/practice#listen", icon: "wave" },
-  { id: "taiko", ar: "طبل المورا", href: "/practice#taiko", icon: "spark" },
-  { id: "assemble", ar: "تركيب الجملة", href: "/practice#assemble", icon: "spark" },
-  { id: "grammar", ar: "مرجع الإعراب", href: "/practice#grammar", icon: "shield" },
+  { id: "review", ar: "المراجعة اليومية", href: "/practice/drill#review", icon: "dojo" },
+  { id: "pitch", ar: "صدى المعاني", href: "/practice/drill#pitch", icon: "wave" },
+  { id: "matrix", ar: "قاعة الكتابة", href: "/practice/drill#matrix", icon: "archive" },
+  { id: "listen", ar: "سباق السرعة الصوتي", href: "/practice/drill#listen", icon: "wave" },
+  { id: "taiko", ar: "طبل المورا", href: "/practice/drill#taiko", icon: "spark" },
+  { id: "assemble", ar: "تركيب الجملة", href: "/practice/drill#assemble", icon: "spark" },
+  { id: "grammar", ar: "مرجع الإعراب", href: "/practice/drill#grammar", icon: "shield" },
   { id: "games", ar: "أركيد الألعاب", href: "/games", icon: "orbit" },
 ];
 
