@@ -90,7 +90,7 @@ export default function SectorHub({ userId, initialMastery, vocab, kanji }: Sect
         <span className="lang-ar font-bold text-cyan">خريطة القطاعات</span>
       </nav>
 
-      <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <header className="mb-5 flex text-[12px] flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="lang-ar text-xl font-bold text-cream">خريطة القطاعات</h1>
           <p className="lang-ar mt-0.5 max-w-xl text-xs leading-relaxed text-muted">
@@ -98,14 +98,14 @@ export default function SectorHub({ userId, initialMastery, vocab, kanji }: Sect
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className="hud-pill sector-scope" style={sectorStyle(active)}>
+          <span className="hud-pill  sector-scope" style={sectorStyle(active)}>
             <span className="lang-ar telemetry-label">الحملة النشطة</span>
             <span
               aria-hidden="true"
-              className="h-2 w-2 rounded-full"
+              className="h-5 w-[0.45] rounded-full"
               style={{ background: "var(--sector-accent)" }}
             />
-            <span className="lang-ar font-bold sector-text">{sectorById(active).titleAr}</span>
+            <span className="lang-ar font-bold mb-1 sector-text">{sectorById(active).titleAr}</span>
           </span>
           <span className="hud-pill">
             <span className="lang-ar telemetry-label">مُراجَعة</span>

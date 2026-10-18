@@ -10,14 +10,15 @@
 /* ------------------------------------------------------------
    Typography tokens
    Body + Headings = Cairo · Kanji = system CJK via Noto stack
-   Furigana = BIZ UDPGothic · Telemetry = JetBrains Mono
+   Furigana = BIZ UDPGothic · Telemetry = JetBrains Mono (Latin/digits)
+   Arabic in mono contexts falls back to Cairo (JetBrains Mono is Latin-only).
    ------------------------------------------------------------ */
 @theme inline {
   --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
   --font-jp: var(--font-notojp), "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   --font-jp-sub: var(--font-bizud), var(--font-notojp), sans-serif;
-  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", var(--font-cairo), ui-monospace, monospace;
   /* Mora Taiko strike-ring pulse */
   --animate-strike: strike 0.35s ease-out both;
   @keyframes strike {
@@ -204,7 +205,7 @@
 }
 
 /* ------------------------------------------------------------
-   Telemetry labels (Latin / numeric only)
+   Telemetry labels — Latin/digits = JetBrains Mono, Arabic = Cairo
    ------------------------------------------------------------ */
 .telemetry {
   font-family: var(--font-mono);
@@ -816,7 +817,7 @@ body {
   border-radius: 9999px;
   background: linear-gradient(180deg, rgba(18, 22, 31, 0.85), rgba(8, 9, 12, 0.9));
   padding-block: 7px;
-  padding-inline: 14px 8px;
+  padding-inline: 15px;
 }
 /* ------------------------------------------------------------
    Chip / badge
@@ -894,7 +895,7 @@ body {
   background-image: var(--sector-art, none);
   background-size: cover;
   background-position: center;
-  opacity: 0.52;
+  opacity: 0.42;
   pointer-events: none;
 }
 .sector-art--fade {
