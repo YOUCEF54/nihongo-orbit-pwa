@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import { ArcadeScreen } from "@/components/games";
 import { createClient } from "@/lib/supabase/server";
+import { loadResonanceServer } from "@/lib/resonance-server";
 
 export const metadata: Metadata = {
   title: "المعداد المداري | تعلّم اليابانية",
@@ -17,8 +18,10 @@ export default async function AstralAbacusPage() {
 
   if (!user) redirect("/login");
 
+  const initialWallet = await loadResonanceServer(user.id);
+
   return (
-    <AppShell userEmail={user.email} userId={user.id}>
+    <AppShell userEmail={user.email} userId={user.id} initialWallet={initialWallet}>
       <div className="screen-shell mx-auto w-full max-w-3xl px-4 sm:px-6">
         <nav className="mb-2 flex items-center gap-2 text-xs" dir="rtl" aria-label="التنقل">
           <a href="/games" className="lang-ar text-faint transition hover:text-cyan">

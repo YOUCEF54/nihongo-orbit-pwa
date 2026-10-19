@@ -19,7 +19,8 @@ import { phraseAudioUrl } from "@/lib/japanese-audio-manifest";
 import type { Playback } from "@/lib/japanese-speech";
 import { ARCADE_JADE_REWARD } from "@/lib/progress-state";
 import { awardArcadeJade } from "@/lib/starlight";
-import { ARCADE_PASS_POINTS, noteResonanceActivity } from "@/lib/resonance";
+import { ARCADE_PASS_POINTS } from "@/lib/resonance";
+import { awardActivityInBackground } from "@/lib/resonance-client";
 import { RewardModal, jadePayout, StageToggle, PauseToggle, PausedOverlay } from "@/components/ui";
 
 type FloodState = "playing" | "won" | "lost";
@@ -127,7 +128,7 @@ export default function RadicalConfluence({
     if (won && awardedRef.current !== key) {
       awardedRef.current = key;
       awardArcadeJade(userId, ARCADE_JADE_REWARD);
-      noteResonanceActivity(userId, ARCADE_PASS_POINTS);
+      awardActivityInBackground(userId, "arcade", ARCADE_PASS_POINTS);
       void queueMicrotask(() => {
         setGameState("won");
         setPrizeShown(true);

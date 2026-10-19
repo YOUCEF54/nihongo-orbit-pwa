@@ -5,6 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import AdminPanel from "@/components/admin/AdminPanel";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/admin";
+import { loadResonanceServer } from "@/lib/resonance-server";
 import { DEFAULT_THEME, THEMES } from "@/lib/themes";
 import { THEME_NAMES } from "@/lib/theme-config";
 import { SECTORS } from "@/lib/curriculum";
@@ -29,6 +30,7 @@ export default async function AdminPage() {
 
   const images = await scanWotdImages();
   const sectorArt = await scanSectorArt();
+  const initialWallet = await loadResonanceServer(user.id);
   const sectors = SECTORS.map((sector) => ({
     id: sector.id,
     order: sector.order,
@@ -50,7 +52,7 @@ export default async function AdminPage() {
   }));
 
   return (
-    <AppShell userEmail={user.email} userId={user.id}>
+    <AppShell userEmail={user.email} userId={user.id} initialWallet={initialWallet}>
       <div className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-6">
         <DashboardHeader
           titleAr="لوحة التحكم"

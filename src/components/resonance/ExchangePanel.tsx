@@ -1,28 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { EXCHANGE_OFFERS, itemById } from "@/lib/items";
-import { redeemOffer } from "@/lib/inventory";
+import { redeemOfferAction } from "@/lib/resonance-actions";
+import { mirrorOutcome } from "@/lib/resonance-client";
 import { useResonance } from "@/lib/use-resonance";
 import { IconCrystal, IconShard, IconTicket } from "@/components/icons";
 
-export default function ExchangePanel({ userId }: { userId: string }) {
+export default function ExchangePanel({
+  userId,
+  online = true,
+}: {
+  userId: string;
+  online?: boolean;
+}) {
   const wallet = useResonance(userId);
   const [notice, setNotice] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const redeem = (offerId: string) => {
-    const outcome = redeemOffer(userId, offerId);
-    if (outcome.ok) {
-      setNotice("تم الاستبدال بنجاح.");
-    } else {
-      setNotice(
-        outcome.error === "insufficient"
-          ? "شظايا غير كافية لهذا العرض."
-          : outcome.error === "owned"
-            ? "تملك هذا العنصر بالفعل."
-            : "تعذّر الاستبدال.",
-      );
-    }
+    setNotice(null);
+    startTransition(async () => {
+      const outcome = await redeemOfferAction(offerId);
+      mirrorOutcome(userId, outcome);
+      if (outcome.ok) {
+        setNotice("تم الاستبدال بنجاح.");
+      } else {
+        setNotice(
+          outcome.error === "insufficient"
+            ? "شظايا غير كافية لهذا العرض."
+            : outcome.error === "owned"
+              ? "تملك هذا العنصر بالفعل."
+              : "تعذّر الاستبدال.",
+        );
+      }
+    });
   };
 
   return (
@@ -78,7 +90,7 @@ export default function ExchangePanel({ userId }: { userId: string }) {
                   <button
                     type="button"
                     onClick={() => redeem(offer.id)}
-                    disabled={owned || !affordable}
+                    disabled={!online || pending || owned || !affordable}
                     className="btn-mini"
                   >
                     <span className="lang-ar">{owned ? "مملوك" : "استبدال"}</span>

@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { ArcadeScreen } from "@/components/games";
 import { createClient } from "@/lib/supabase/server";
 import { loadMasteryServer } from "@/lib/mastery-server";
+import { loadResonanceServer } from "@/lib/resonance-server";
 import { VOCAB_SEED } from "@/data/vocab.seed";
 import { seenVocab } from "@/lib/game-access";
 
@@ -22,9 +23,10 @@ export default async function MoraTaikoPage() {
 
   const mastery = await loadMasteryServer(user.id);
   const pool = seenVocab(VOCAB_SEED, mastery);
+  const initialWallet = await loadResonanceServer(user.id);
 
   return (
-    <AppShell userEmail={user.email} userId={user.id}>
+    <AppShell userEmail={user.email} userId={user.id} initialWallet={initialWallet}>
       <div className="screen-shell mx-auto w-full max-w-3xl px-4 sm:px-6">
         <nav className="mb-2 flex items-center gap-2 text-xs" dir="rtl" aria-label="التنقل">
           <a href="/games" className="lang-ar text-faint transition hover:text-cyan">

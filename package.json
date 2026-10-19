@@ -7,6 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --test src/lib/*.test.mts",
+    "test:e2e": "playwright test",
+    "db:link": "npx --yes supabase link",
+    "db:push": "npx --yes supabase db push",
+    "db:status": "npx --yes supabase migration list",
     "gen:wotd": "node scripts/gen-wotd-images.mjs",
     "gen:sectors": "node scripts/gen-sector-art.mjs",
     "gen:kanjivg": "node scripts/gen-kanjivg.mjs",
@@ -24,6 +29,7 @@
     "ts-fsrs": "^5.4.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

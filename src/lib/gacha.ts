@@ -49,6 +49,16 @@ export interface BannerDef {
 /** Marginal 4★ rate after the 5★ roll misses (plan001: 7.8%). */
 export const BASE_4_RATE = 0.078;
 
+/**
+ * Server-side RNG for real pulls (32 bits of entropy per roll is far
+ * beyond what a 1.2% gacha needs). Tests inject their own RNG instead.
+ */
+export function secureRandom(): number {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return values[0] / 0x100000000;
+}
+
 export const STANDARD_BANNER: BannerDef = {
   id: "standard",
   titleAr: "المستكشف القياسي",

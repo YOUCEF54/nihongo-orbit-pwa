@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import HomeDashboard from "./home-dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { loadMasteryServer } from "@/lib/mastery-server";
+import { loadResonanceServer } from "@/lib/resonance-server";
 
 export const metadata: Metadata = {
   title: "الرئيسية | تعلّم اليابانية",
@@ -20,9 +21,10 @@ export default async function HomePage() {
   if (!user) redirect("/login");
 
   const initialMastery = await loadMasteryServer(user.id);
+  const initialWallet = await loadResonanceServer(user.id);
 
   return (
-    <AppShell userEmail={user.email} userId={user.id}>
+    <AppShell userEmail={user.email} userId={user.id} initialWallet={initialWallet}>
       <HomeDashboard
         userId={user.id}
         userEmail={user.email ?? ""}

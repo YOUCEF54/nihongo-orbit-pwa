@@ -25,12 +25,13 @@ import type { Sector, SectorId } from "@/types/curriculum";
 import { DOJO_STEPS, DOJO_STEP_COUNT, stepIndexForHash, type DojoStepId } from "@/lib/dojo-steps";
 import { cardStateLabel, cardStateOf, cardToMastery, createFsrsCard, masteryToCard, type Card } from "@/lib/fsrs";
 import { loadMasteryLocal, saveMasteryLocal } from "@/lib/mastery";
-import { noteReviewActivity } from "@/lib/progress-state";
 import { evaluateGameUnlocks, seenVocab } from "@/lib/game-access";
 import { progressForSector } from "@/lib/sector-progress";
 import { SECTOR_JADE_REWARD, useSectorState } from "@/lib/sector-state";
 import { awardArcadeJade } from "@/lib/starlight";
-import { SECTOR_CRYSTALS, SECTOR_PASSES, awardResonance } from "@/lib/resonance";
+import { SECTOR_CRYSTALS, SECTOR_PASSES } from "@/lib/resonance";
+import { completeSectorAction } from "@/lib/resonance-actions";
+import { awardActivityInBackground, mirrorOutcome } from "@/lib/resonance-client";
 import { styleFinish } from "@/lib/inventory";
 import { useResonance } from "@/lib/use-resonance";
 import { useKanjivgStrokes, type StrokeSlot } from "@/lib/use-kanji-strokes";
@@ -327,7 +328,11 @@ export default function DojoContent({
     if (!progress.isComplete) return;
     if (!sectorState.markComplete(activeSector)) return;
     awardArcadeJade(userId, SECTOR_JADE_REWARD);
-    awardResonance(userId, { crystals: SECTOR_CRYSTALS, passes: SECTOR_PASSES });
+    void completeSectorAction(activeSector)
+      .then((outcome) => mirrorOutcome(userId, outcome))
+      .catch(() => {
+        // Best-effort: the sector stays locally complete and re-awards on retry.
+      });
     setReward({
       sectorAr: sectorById(activeSector).titleAr,
       jade: SECTOR_JADE_REWARD,
@@ -340,7 +345,7 @@ export default function DojoContent({
     const updated = { ...mastery, [id]: item };
     setMastery(updated);
     saveMasteryLocal(userId, updated);
-    noteReviewActivity(userId);
+    awardActivityInBackground(userId, "review", 1);
     void persist(item);
     maybeCompleteSector(updated);
     if (deckIndex < sectorVocab.length - 1) {

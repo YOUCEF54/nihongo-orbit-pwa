@@ -1,5 +1,5 @@
 /* ============================================================
-   Resonance inventory â€” ownership queries and item use.
+   Resonance inventory — ownership queries and item use.
    Keeps every cross-module effect in one place so the pull engine
    stays pure and the wallet store stays dumb.
    ============================================================ */
@@ -40,7 +40,7 @@ export function ownedThemes(state: ResonanceState): ThemeId[] {
     .filter((id): id is ThemeId => Boolean(id));
 }
 
-/** Rarest owned card finish â€” applied automatically to study surfaces. */
+/** Rarest owned card finish — applied automatically to study surfaces. */
 export function bestOwnedStyle(state: ResonanceState): ItemDef | undefined {
   return ownedOf(state, "style")[0];
 }

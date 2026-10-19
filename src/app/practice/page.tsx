@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import SectorHub from "@/components/sector/SectorHub";
 import { createClient } from "@/lib/supabase/server";
 import { loadMasteryServer } from "@/lib/mastery-server";
+import { loadResonanceServer } from "@/lib/resonance-server";
 import { VOCAB_SEED } from "@/data/vocab.seed";
 import { KANJI_SEED } from "@/data/kanji.seed";
 
@@ -22,9 +23,10 @@ export default async function PracticePage() {
   if (!user) redirect("/login");
 
   const initialMastery = await loadMasteryServer(user.id);
+  const initialWallet = await loadResonanceServer(user.id);
 
   return (
-    <AppShell userEmail={user.email} userId={user.id}>
+    <AppShell userEmail={user.email} userId={user.id} initialWallet={initialWallet}>
       <SectorHub
         userId={user.id}
         initialMastery={initialMastery}

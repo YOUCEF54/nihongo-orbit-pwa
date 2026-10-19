@@ -8,6 +8,15 @@ import { DOCK_ROUTES, TERMINAL_ROUTES, handleLabelFor, type ShellIcon } from "@/
 import { useJapaneseVoice } from "@/lib/use-japanese-voice";
 import { useResonance } from "@/lib/use-resonance";
 import { equippedTitleDef, ownedThemes } from "@/lib/inventory";
+import {
+  hasAdoptedTheme,
+  hydrateResonance,
+  markThemeAdopted,
+  snapshotResonance,
+  type ResonanceState,
+} from "@/lib/resonance";
+import { adoptThemeAction } from "@/lib/resonance-actions";
+import { mirrorOutcome } from "@/lib/resonance-client";
 import { useTheme } from "./ThemeProvider";
 import ThemeToggle from "./ThemeToggle";
 import VoicePanel from "./VoicePanel";
@@ -95,10 +104,13 @@ export default function AppShell({
   children,
   userEmail,
   userId,
+  initialWallet,
 }: {
   children: ReactNode;
   userEmail?: string;
   userId?: string;
+  /** Server wallet (Phase E). Null when the server tables are unavailable. */
+  initialWallet?: ResonanceState | null;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -121,11 +133,32 @@ export default function AppShell({
   );
   const showVoiceBanner = voiceStatus.state === "missing" && !voiceBannerDismissed;
 
-  // Gating: a theme that is not owned falls back to the first owned one.
+  // Wallet sync, starter-theme grace, and ownership gating — one effect so
+  // the order is explicit: hydrate → adopt → (only then) fall back.
   useEffect(() => {
-    if (!userId || owned.length === 0) return;
-    if (!owned.includes(theme)) setTheme(owned[0]);
-  }, [userId, owned, theme, setTheme]);
+    if (!userId) return;
+    if (initialWallet) hydrateResonance(userId, initialWallet);
+
+    const base = initialWallet ?? snapshotResonance(userId);
+    const ownedIds = ownedThemes(base);
+    if (ownedIds.length === 0) return;
+    if (ownedIds.includes(theme)) return;
+
+    if (!hasAdoptedTheme(userId, theme)) {
+      markThemeAdopted(userId, theme);
+      const fallback = ownedIds[0];
+      void adoptThemeAction(theme)
+        .then((outcome) => {
+          if (!mirrorOutcome(userId, outcome).ok) setTheme(fallback);
+        })
+        .catch(() => {
+          setTheme(fallback);
+        });
+      return;
+    }
+
+    setTheme(ownedIds[0]);
+  }, [userId, initialWallet, theme, setTheme]);
 
   const openTerminal = (view: "menu" | "voice") => {
     setTerminalView(view);

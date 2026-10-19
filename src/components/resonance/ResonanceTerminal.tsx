@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useResonance } from "@/lib/use-resonance";
-import { STANDARD_BANNER, executePull, pityFor, type PullResult } from "@/lib/gacha";
+import { STANDARD_BANNER, pityFor, type PullResult } from "@/lib/gacha";
+import { pullAction } from "@/lib/resonance-actions";
+import { mirrorOutcome } from "@/lib/resonance-client";
 import { REVIEWS_PER_PASS } from "@/lib/resonance";
 import { IconCrystal, IconShard, IconTicket } from "@/components/icons";
 import PullReveal from "./PullReveal";
@@ -32,32 +34,57 @@ function CurrencyChip({
   );
 }
 
-export default function ResonanceTerminal({ userId }: { userId: string }) {
+const PULL_ERROR_AR: Record<string, string> = {
+  insufficient: "لا تملك تذاكر كافية — تابع المراجعة لتكسب المزيد.",
+  unavailable: "تعذّر الاتصال بالمحطة — حاول مجددًا.",
+};
+
+export default function ResonanceTerminal({
+  userId,
+  online = true,
+}: {
+  userId: string;
+  /** False when the server wallet is unavailable (migration pending). */
+  online?: boolean;
+}) {
   const wallet = useResonance(userId);
   const banner = STANDARD_BANNER;
   const [reveal, setReveal] = useState<PullResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const pity = pityFor(wallet, banner.id);
   const pityRatio = Math.min(1, pity.count / banner.pity.hardCap);
   const softRatio = banner.pity.softStart / banner.pity.hardCap;
 
   const pull = (count: number) => {
-    const outcome = executePull(userId, banner.id, count);
-    if (!outcome.ok) {
-      setError(
-        outcome.error === "insufficient"
-          ? "لا تملك تذاكر كافية — تابع المراجعة لتكسب المزيد."
-          : "تعذّر السحب — حاول مجددًا.",
-      );
-      return;
-    }
     setError(null);
-    setReveal(outcome.results);
+    startTransition(async () => {
+      try {
+        const outcome = await pullAction(banner.id, count);
+        if (!outcome.ok) {
+          setError(PULL_ERROR_AR[outcome.error ?? ""] ?? "تعذّر السحب — حاول مجددًا.");
+          return;
+        }
+        mirrorOutcome(userId, outcome);
+        if (outcome.results) setReveal(outcome.results);
+      } catch {
+        setError("تعذّر الاتصال بالمحطة — حاول مجددًا.");
+      }
+    });
   };
 
   return (
     <div className="space-y-5">
+      {!online && (
+        <p
+          role="status"
+          className="lang-ar rounded-xl border border-hazard/40 bg-hazard/10 px-4 py-3 text-xs font-bold text-cream"
+        >
+          المحطة غير متصلة — فعّل جداول المحطة (ترحيلة 0026) ثم أعد تحميل الصفحة.
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <CurrencyChip
           icon={IconCrystal}
@@ -134,10 +161,10 @@ export default function ResonanceTerminal({ userId }: { userId: string }) {
             type="button"
             data-testid="pull-1"
             onClick={() => pull(1)}
-            disabled={wallet.passes < 1}
+            disabled={!online || pending || wallet.passes < 1}
             className="btn-primary"
           >
-            <span className="lang-ar">سحب ×١</span>
+            <span className="lang-ar">{pending ? "جارٍ السحب…" : "سحب ×١"}</span>
             <span className="telemetry text-[10px]" dir="ltr">
               1 PASS
             </span>
@@ -146,10 +173,10 @@ export default function ResonanceTerminal({ userId }: { userId: string }) {
             type="button"
             data-testid="pull-10"
             onClick={() => pull(10)}
-            disabled={wallet.passes < 10}
+            disabled={!online || pending || wallet.passes < 10}
             className="btn-primary"
           >
-            <span className="lang-ar">سحب ×١٠</span>
+            <span className="lang-ar">{pending ? "جارٍ السحب…" : "سحب ×١٠"}</span>
             <span className="telemetry text-[10px]" dir="ltr">
               10 PASS
             </span>
@@ -165,8 +192,8 @@ export default function ResonanceTerminal({ userId }: { userId: string }) {
         )}
       </section>
 
-      <CollectionPanel userId={userId} />
-      <ExchangePanel userId={userId} />
+      <CollectionPanel userId={userId} online={online} />
+      <ExchangePanel userId={userId} online={online} />
       <HistoryPanel userId={userId} />
 
       <PullReveal results={reveal} onClose={() => setReveal(null)} />

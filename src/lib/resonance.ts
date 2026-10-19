@@ -278,6 +278,33 @@ export function saveResonance(uid: string, state: ResonanceState): void {
   emit(uid);
 }
 
+/**
+ * Install the server wallet (Phase E source of truth) as the rendered
+ * snapshot and refresh the local mirror. Notifies subscribers so
+ * consumers re-render once the server value lands.
+ */
+export function hydrateResonance(uid: string, state: ResonanceState): void {
+  try {
+    storageSet(RESONANCE_KEY(uid), JSON.stringify(state));
+  } catch {
+    // best-effort mirror
+  }
+  snapshotCache.set(uid, state);
+  emit(uid);
+}
+
+const THEME_ADOPT_KEY = (uid: string, themeId: string) =>
+  `learnjp:resonance-adopted:${uid}:${themeId}`;
+
+/** True when the one-time starter grace already ran for this theme. */
+export function hasAdoptedTheme(uid: string, themeId: string): boolean {
+  return storageGet(THEME_ADOPT_KEY(uid, themeId)) === "1";
+}
+
+export function markThemeAdopted(uid: string, themeId: string): void {
+  storageSet(THEME_ADOPT_KEY(uid, themeId), "1");
+}
+
 /** Referentially stable wallet for React subscribers. */
 export function snapshotResonance(uid: string): ResonanceState {
   const cached = snapshotCache.get(uid);

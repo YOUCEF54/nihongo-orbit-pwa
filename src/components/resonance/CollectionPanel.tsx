@@ -1,14 +1,25 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { consumeItem, equipTitle, ownedOf } from "@/lib/inventory";
+import { useState, useTransition, type ReactNode } from "react";
+import { ownedOf } from "@/lib/inventory";
+import { grantEnergy } from "@/lib/progress-state";
+import { grantCache } from "@/lib/starlight";
+import { consumeItemAction, equipTitleAction } from "@/lib/resonance-actions";
+import { mirrorOutcome } from "@/lib/resonance-client";
 import { useResonance } from "@/lib/use-resonance";
 import { IconCrystal } from "@/components/icons";
 import { RARITY_COLOR, RARITY_STARS, itemIcon } from "./item-visuals";
 
-export default function CollectionPanel({ userId }: { userId: string }) {
+export default function CollectionPanel({
+  userId,
+  online = true,
+}: {
+  userId: string;
+  online?: boolean;
+}) {
   const wallet = useResonance(userId);
   const [notice, setNotice] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const themes = ownedOf(wallet, "theme");
   const styles = ownedOf(wallet, "style");
@@ -17,13 +28,27 @@ export default function CollectionPanel({ userId }: { userId: string }) {
   const activeTitle = wallet.equippedTitle || "title-explorer";
 
   const equip = (itemId: string) => {
-    const outcome = equipTitle(userId, itemId);
-    setNotice(outcome.ok ? `تم تعيين اللقب.` : "تعذّر التعيين.");
+    setNotice(null);
+    startTransition(async () => {
+      const outcome = await equipTitleAction(itemId);
+      mirrorOutcome(userId, outcome);
+      setNotice(outcome.ok ? "تم تعيين اللقب." : "تعذّر التعيين.");
+    });
   };
 
   const consume = (itemId: string) => {
-    const outcome = consumeItem(userId, itemId);
-    setNotice(outcome.ok ? "تم استخدام الشحنة." : "تعذّر الاستخدام.");
+    setNotice(null);
+    startTransition(async () => {
+      const outcome = await consumeItemAction(itemId);
+      mirrorOutcome(userId, outcome);
+      if (!outcome.ok) {
+        setNotice("تعذّر الاستخدام.");
+        return;
+      }
+      if (outcome.effect?.type === "energy") grantEnergy(userId, outcome.effect.amount);
+      else if (outcome.effect?.type === "cache") grantCache(userId, outcome.effect.amount);
+      setNotice("تم استخدام الشحنة.");
+    });
   };
 
   return (
@@ -49,7 +74,7 @@ export default function CollectionPanel({ userId }: { userId: string }) {
             <button
               type="button"
               onClick={() => equip(item.id)}
-              disabled={activeTitle === item.id}
+              disabled={!online || pending || activeTitle === item.id}
               className="btn-mini"
             >
               <span className="lang-ar">
@@ -63,7 +88,12 @@ export default function CollectionPanel({ userId }: { userId: string }) {
           items={consumables}
           renderBadge={(item) => `×${wallet.owned[item.id] ?? 0}`}
           renderAction={(item) => (
-            <button type="button" onClick={() => consume(item.id)} className="btn-mini">
+            <button
+              type="button"
+              onClick={() => consume(item.id)}
+              disabled={!online || pending}
+              className="btn-mini"
+            >
               <span className="lang-ar">استخدام</span>
             </button>
           )}

@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ResonanceTerminal from "@/components/resonance/ResonanceTerminal";
 import { createClient } from "@/lib/supabase/server";
+import { loadResonanceServer } from "@/lib/resonance-server";
 
 export const metadata: Metadata = {
   title: "محطة الرنين | تعلّم اليابانية",
@@ -18,8 +19,10 @@ export default async function ResonancePage() {
 
   if (!user) redirect("/login");
 
+  const initialWallet = await loadResonanceServer(user.id);
+
   return (
-    <AppShell userEmail={user.email} userId={user.id}>
+    <AppShell userEmail={user.email} userId={user.id} initialWallet={initialWallet}>
       <div className="mx-auto w-full max-w-5xl px-6 pb-14">
         <DashboardHeader
           titleAr="محطة الرنين"
@@ -29,7 +32,7 @@ export default async function ResonancePage() {
             { href: "/resonance", ar: "الرنين" },
           ]}
         />
-        <ResonanceTerminal userId={user.id} />
+        <ResonanceTerminal userId={user.id} online={initialWallet !== null} />
       </div>
     </AppShell>
   );
