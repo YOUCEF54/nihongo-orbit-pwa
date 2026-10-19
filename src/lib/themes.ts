@@ -1,4 +1,4 @@
-import { THEME_DEFAULT_ID, THEME_NAMES } from "./theme-config";
+import { THEME_DEFAULT_ID, THEME_NAMES } from "./theme-config.ts";
 
 export const THEME_STORAGE_KEY = "learnjp:theme";
 

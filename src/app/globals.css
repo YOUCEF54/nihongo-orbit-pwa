@@ -120,6 +120,12 @@
   --foil-b: rgba(0, 240, 255, 0.05);
   --selection-bg: rgba(0, 240, 255, 0.28);
 
+  /* scrollbars (theme-switchable) */
+  --scrollbar-track: rgba(11, 13, 18, 0.6);
+  --scrollbar-thumb: rgba(0, 240, 255, 0.4);
+  --scrollbar-thumb-hover: rgba(0, 240, 255, 0.78);
+  --scrollbar-glow: rgba(0, 240, 255, 0.35);
+
   /* geometry */
   --chamfer: 12px;
   --chamfer-lg: 22px;
@@ -571,6 +577,31 @@ body {
     opacity: 0.35;
   }
 
+  /* Resonance card finishes (items.ts style kind) */
+  .card-finish-ember {
+    border-color: color-mix(in srgb, var(--color-amber) 55%, transparent);
+    box-shadow:
+      0 0 18px rgba(243, 209, 132, 0.22),
+      inset 0 0 26px rgba(243, 209, 132, 0.07);
+  }
+  .card-finish-prism::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(130deg, #00f0ff, #a855f7, #ff0055, #f3d184);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
   /* Minimalist game canvas — direction-neutral island inside RTL shell */
   .game-canvas {
     direction: ltr;
@@ -615,6 +646,45 @@ body {
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* ------------------------------------------------------------
+     Themed scrollbars — neon rail in tactical, gilt in hybrid,
+     calm teal in minimal. Chromium/Safari get the rounded glowing
+     thumb; Firefox (no ::-webkit-scrollbar support) gets the
+     standard properties with the same tokens.
+     ------------------------------------------------------------ */
+  @supports selector(::-webkit-scrollbar) {
+    *::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    *::-webkit-scrollbar-track {
+      background-color: var(--scrollbar-track);
+    }
+    *::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      background-clip: padding-box;
+      border: 2px solid transparent;
+      border-radius: 9999px;
+      transition: background-color 150ms ease;
+    }
+    *::-webkit-scrollbar-thumb:hover {
+      background-color: var(--scrollbar-thumb-hover);
+      box-shadow: 0 0 10px var(--scrollbar-glow);
+    }
+    *::-webkit-scrollbar-thumb:active {
+      background-color: color-mix(in srgb, var(--scrollbar-thumb-hover) 85%, #ffffff);
+    }
+    *::-webkit-scrollbar-corner {
+      background-color: var(--scrollbar-track);
+    }
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
   }
   @media (max-height: 599px) {
     .screen-shell {
@@ -1041,6 +1111,12 @@ body {
 
   --glow-cyan: 0 0 20px rgba(243, 209, 132, 0.3);
   --glow-crimson: 0 0 20px rgba(230, 58, 80, 0.3);
+
+  /* gilded scrollbar rail */
+  --scrollbar-track: rgba(8, 9, 12, 0.62);
+  --scrollbar-thumb: rgba(243, 209, 132, 0.4);
+  --scrollbar-thumb-hover: rgba(243, 209, 132, 0.78);
+  --scrollbar-glow: rgba(243, 209, 132, 0.35);
 }
 
 [data-theme="hybrid"] body {
@@ -1115,6 +1191,12 @@ body {
 
   --glow-cyan: 0 0 16px rgba(14, 165, 233, 0.25);
   --glow-crimson: 0 0 16px rgba(239, 68, 68, 0.25);
+
+  /* calm scrollbar rail */
+  --scrollbar-track: rgba(11, 14, 20, 0.55);
+  --scrollbar-thumb: rgba(14, 165, 233, 0.38);
+  --scrollbar-thumb-hover: rgba(14, 165, 233, 0.72);
+  --scrollbar-glow: rgba(14, 165, 233, 0.3);
 }
 
 /* Legacy gold utilities — harmless alias in tactical (gold → cyan) */

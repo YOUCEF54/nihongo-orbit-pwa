@@ -6,22 +6,31 @@ import { createClient } from "@/lib/supabase/client";
 import { isAdmin } from "@/lib/admin";
 import { DOCK_ROUTES, TERMINAL_ROUTES, handleLabelFor, type ShellIcon } from "@/lib/shell";
 import { useJapaneseVoice } from "@/lib/use-japanese-voice";
+import { useResonance } from "@/lib/use-resonance";
+import { equippedTitleDef, ownedThemes } from "@/lib/inventory";
+import { useTheme } from "./ThemeProvider";
 import ThemeToggle from "./ThemeToggle";
 import VoicePanel from "./VoicePanel";
 import { useDialogFocus } from "./ui/use-dialog-focus";
 import {
-  IconArchive,
+  IconBlocks,
   IconBolt,
+  IconBrush,
+  IconCards,
+  IconCrystal,
   IconDojo,
+  IconDrum,
+  IconEar,
   IconGear,
+  IconGrid,
+  IconHeadphones,
   IconHome,
-  IconPhone,
-  IconShield,
-  IconSpark,
-  IconUser,
   IconOrbit,
+  IconParticles,
+  IconPhone,
+  IconShuffle,
+  IconUser,
   IconVolume,
-  IconWave,
 } from "./icons";
 
 const VOICE_BANNER_KEY = "learnjp:voice-banner-dismissed";
@@ -55,27 +64,41 @@ function DockIcon({ icon, className = "" }: { icon: ShellIcon; className?: strin
   switch (icon) {
     case "home":
       return <IconHome className={className} />;
-    case "archive":
-      return <IconArchive className={className} />;
     case "dojo":
       return <IconDojo className={className} />;
     case "orbit":
       return <IconOrbit className={className} />;
-    case "wave":
-      return <IconWave className={className} />;
-    case "spark":
-      return <IconSpark className={className} />;
-    case "shield":
-      return <IconShield className={className} />;
+    case "brush":
+      return <IconBrush className={className} />;
+    case "shuffle":
+      return <IconShuffle className={className} />;
+    case "cards":
+      return <IconCards className={className} />;
+    case "ear":
+      return <IconEar className={className} />;
+    case "grid":
+      return <IconGrid className={className} />;
+    case "headphones":
+      return <IconHeadphones className={className} />;
+    case "blocks":
+      return <IconBlocks className={className} />;
+    case "particles":
+      return <IconParticles className={className} />;
+    case "drum":
+      return <IconDrum className={className} />;
+    case "crystal":
+      return <IconCrystal className={className} />;
   }
 }
 
 export default function AppShell({
   children,
   userEmail,
+  userId,
 }: {
   children: ReactNode;
   userEmail?: string;
+  userId?: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -87,12 +110,22 @@ export default function AppShell({
   const dockOpen = dockPinned || dockHovered;
   const handle = handleLabelFor(userEmail);
   const voiceStatus = useJapaneseVoice();
+  const wallet = useResonance(userId);
+  const { theme, setTheme } = useTheme();
+  const owned = ownedThemes(wallet);
+  const titleCode = equippedTitleDef(wallet)?.code ?? "OPR";
   const voiceBannerDismissed = useSyncExternalStore(
     subscribeVoiceBanner,
     readVoiceBannerDismissed,
     () => true,
   );
   const showVoiceBanner = voiceStatus.state === "missing" && !voiceBannerDismissed;
+
+  // Gating: a theme that is not owned falls back to the first owned one.
+  useEffect(() => {
+    if (!userId || owned.length === 0) return;
+    if (!owned.includes(theme)) setTheme(owned[0]);
+  }, [userId, owned, theme, setTheme]);
 
   const openTerminal = (view: "menu" | "voice") => {
     setTerminalView(view);
@@ -130,8 +163,12 @@ export default function AppShell({
               <span className="grid h-10 w-10 place-items-center rounded-full border border-cyan/40 bg-abyss">
                 <IconUser className="h-5 w-5 text-cyan" />
               </span>
-              <span className="absolute -bottom-1 -end-1 rounded-md border border-cyan/40 bg-void px-1 font-mono text-[9px] font-bold text-cyan">
-                OPR
+              <span
+                data-testid="operator-title"
+                title={equippedTitleDef(wallet)?.nameAr}
+                className="absolute -bottom-1 -end-1 rounded-md border border-cyan/40 bg-void px-1 font-mono text-[9px] font-bold text-cyan"
+              >
+                {titleCode}
               </span>
             </div>
             <div className="hidden sm:block">
@@ -143,7 +180,7 @@ export default function AppShell({
           </div>
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
+            <ThemeToggle owned={owned} />
             <button
               type="button"
               onClick={() => openTerminal("menu")}

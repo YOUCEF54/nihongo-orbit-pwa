@@ -8,6 +8,7 @@ import {
   resolveStrokes,
   writeStrokeCache,
 } from "./kanjivg.ts";
+import { KANJIVG_LOCAL, kanjivgLocalUrl } from "./kanjivg-local-manifest.ts";
 
 const SVG_FIXTURE = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 109 109">
@@ -76,6 +77,16 @@ test("resolveStrokes skips fetch when cache is warm", async () => {
     assert.deepEqual(result, ["M-cached"]);
   } finally {
     globalThis.fetch = original;
+  }
+});
+
+test("kanjivgLocalUrl resolves only bundled 5-digit hex codes", () => {
+  assert.equal(kanjivgLocalUrl("zzzzz"), null);
+  assert.equal(kanjivgLocalUrl(""), null);
+  for (const [hex, url] of Object.entries(KANJIVG_LOCAL)) {
+    assert.match(hex, /^[0-9a-f]{5}$/, `bad manifest key ${hex}`);
+    assert.equal(kanjivgLocalUrl(hex), url);
+    assert.equal(kanjivgLocalUrl(hex.toUpperCase()), url);
   }
 });
 

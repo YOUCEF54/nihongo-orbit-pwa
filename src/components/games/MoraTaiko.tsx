@@ -21,6 +21,7 @@ import { hash, makeRandom, shuffle } from "@/lib/random";
 import { EmptyState, PauseToggle, PausedOverlay } from "@/components/ui";
 import { ARCADE_JADE_REWARD } from "@/lib/progress-state";
 import { awardArcadeJade } from "@/lib/starlight";
+import { ARCADE_PASS_POINTS, noteResonanceActivity } from "@/lib/resonance";
 
 const ROUNDS = 5;
 /** How far ahead (ms) notes are visible before the strike line. */
@@ -235,6 +236,7 @@ export default function MoraTaiko({
             if (userId) {
               try {
                 awardArcadeJade(userId, ARCADE_JADE_REWARD);
+                noteResonanceActivity(userId, ARCADE_PASS_POINTS);
                 setJadeAwarded(ARCADE_JADE_REWARD);
               } catch {
                 // rewards are best-effort

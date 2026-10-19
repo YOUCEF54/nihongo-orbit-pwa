@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { IconOrbit, IconSpark, IconWave } from "@/components/icons";
+import { IconDrum, IconFlood, IconHexRing } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -16,21 +16,21 @@ const GAMES = [
     titleAr: "المعداد المداري",
     descAr: "دوّر حلقات السداسيات ورتّب عملات الجذور لتُركّب الكانجي من جذوره.",
     href: "/games/astral-abacus",
-    icon: IconOrbit,
+    icon: IconHexRing,
   },
   {
     id: "radical-confluence",
     titleAr: "توحيد الجذور",
     descAr: "اغمر مصفوفة الجذور ١٠×١٠ بجذرٍ واحد قبل نفاد دورات التزامن الـ٢٢.",
     href: "/games/radical-confluence",
-    icon: IconSpark,
+    icon: IconFlood,
   },
   {
     id: "mora-taiko",
     titleAr: "طبل المورا",
     descAr: "اضرب المركز للنغمة العالية والحافة للمنخفضة على إيقاع المورا.",
     href: "/games/mora-taiko",
-    icon: IconWave,
+    icon: IconDrum,
   },
 ];
 
@@ -43,7 +43,7 @@ export default async function GamesIndexPage() {
   if (!user) redirect("/login");
 
   return (
-    <AppShell userEmail={user.email}>
+    <AppShell userEmail={user.email} userId={user.id}>
       <div className="mx-auto w-full max-w-5xl px-6 pb-14">
         <DashboardHeader
           titleAr="أركيد الألعاب"

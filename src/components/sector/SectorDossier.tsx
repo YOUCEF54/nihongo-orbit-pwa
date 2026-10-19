@@ -2,7 +2,16 @@
 
 import type { ComponentType } from "react";
 import Link from "next/link";
-import { IconArchive, IconBolt, IconPlay, IconSpark, IconTrophy, IconWave } from "@/components/icons";
+import {
+  IconBlocks,
+  IconDrum,
+  IconEar,
+  IconGrid,
+  IconHeadphones,
+  IconParticles,
+  IconPlay,
+  IconTrophy,
+} from "@/components/icons";
 import { SECTOR_SKINS, sectorStyle } from "@/lib/sector-skins";
 import { sectorArtUrl } from "@/lib/sector-art-manifest";
 import { evaluateGameUnlocks, unlockProgress } from "@/lib/game-access";
@@ -11,11 +20,11 @@ import { ProgressRing, type SectorNodeView } from "./SectorNode";
 import type { Sector } from "@/types/curriculum";
 
 const UNLOCK_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  "echo-link": IconWave,
-  "listening-lab": IconBolt,
-  "taiko-mora": IconSpark,
-  "sov-assembly": IconArchive,
-  "grammar-core": IconTrophy,
+  "echo-link": IconEar,
+  "listening-lab": IconHeadphones,
+  "taiko-mora": IconDrum,
+  "sov-assembly": IconBlocks,
+  "grammar-core": IconParticles,
 };
 
 function Stat({ labelAr, value, tone = "text-cream" }: { labelAr: string; value: number; tone?: string }) {
@@ -123,7 +132,7 @@ export default function SectorDossier({
             <span className="telemetry-label lang-ar sector-text">هذا القطاع يفتح</span>
             <div className="flex flex-col gap-1.5">
               {unlocks.map((entry) => {
-                const Icon = UNLOCK_ICONS[entry.gameId] ?? IconSpark;
+                const Icon = UNLOCK_ICONS[entry.gameId] ?? IconParticles;
                 return (
                   <div
                     key={entry.gameId}
@@ -178,7 +187,7 @@ export default function SectorDossier({
         )}
         {kind === "kanji-only" && (
           <Link href="/practice/drill#matrix" className="btn-cyan sector-cta w-full">
-            <IconArchive className="h-4 w-4" />
+            <IconGrid className="h-4 w-4" />
             <span className="lang-ar">ابدأ تدريب الكانجي</span>
           </Link>
         )}

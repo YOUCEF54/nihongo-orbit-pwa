@@ -18,7 +18,7 @@ export default async function AstralAbacusPage() {
   if (!user) redirect("/login");
 
   return (
-    <AppShell userEmail={user.email}>
+    <AppShell userEmail={user.email} userId={user.id}>
       <div className="screen-shell mx-auto w-full max-w-3xl px-4 sm:px-6">
         <nav className="mb-2 flex items-center gap-2 text-xs" dir="rtl" aria-label="التنقل">
           <a href="/games" className="lang-ar text-faint transition hover:text-cyan">

@@ -5,6 +5,7 @@ export const WOTD_IMAGE: Record<string, string> = {
   "v0-001": "/wotd/v0-001.webp",
   "v1-008": "/wotd/v1-008.webp",
   "v1-009": "/wotd/v1-009.webp",
+  "v1-010": "/wotd/v1-010.webp",
 };
 
 export function wotdImageUrl(id: string): string | null {

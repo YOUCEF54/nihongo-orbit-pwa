@@ -1,4 +1,17 @@
-export type ShellIcon = "home" | "archive" | "dojo" | "orbit" | "wave" | "spark" | "shield";
+export type ShellIcon =
+  | "home"
+  | "dojo"
+  | "orbit"
+  | "brush"
+  | "shuffle"
+  | "cards"
+  | "ear"
+  | "grid"
+  | "headphones"
+  | "blocks"
+  | "particles"
+  | "drum"
+  | "crystal";
 
 export interface ShellRoute {
   id: string;
@@ -10,17 +23,19 @@ export interface ShellRoute {
 export const DOCK_ROUTES: ShellRoute[] = [
   { id: "home", ar: "الرئيسية", href: "/", icon: "home" },
   { id: "practice", ar: "الدوجو", href: "/practice", icon: "dojo" },
+  { id: "resonance", ar: "الرنين", href: "/resonance", icon: "crystal" },
   { id: "games", ar: "الأركيد", href: "/games", icon: "orbit" },
 ];
 
 export const TERMINAL_ROUTES: ShellRoute[] = [
-  { id: "review", ar: "المراجعة اليومية", href: "/practice/drill#review", icon: "dojo" },
-  { id: "pitch", ar: "صدى المعاني", href: "/practice/drill#pitch", icon: "wave" },
-  { id: "matrix", ar: "قاعة الكتابة", href: "/practice/drill#matrix", icon: "archive" },
-  { id: "listen", ar: "سباق السرعة الصوتي", href: "/practice/drill#listen", icon: "wave" },
-  { id: "taiko", ar: "طبل المورا", href: "/practice/drill#taiko", icon: "spark" },
-  { id: "assemble", ar: "تركيب الجملة", href: "/practice/drill#assemble", icon: "spark" },
-  { id: "grammar", ar: "مرجع الإعراب", href: "/practice/drill#grammar", icon: "shield" },
+  { id: "review", ar: "المراجعة اليومية", href: "/practice/drill#review", icon: "cards" },
+  { id: "pitch", ar: "صدى المعاني", href: "/practice/drill#pitch", icon: "ear" },
+  { id: "matrix", ar: "قاعة الكتابة", href: "/practice/drill#matrix", icon: "grid" },
+  { id: "listen", ar: "سباق السرعة الصوتي", href: "/practice/drill#listen", icon: "headphones" },
+  { id: "taiko", ar: "طبل المورا", href: "/practice/drill#taiko", icon: "drum" },
+  { id: "assemble", ar: "تركيب الجملة", href: "/practice/drill#assemble", icon: "blocks" },
+  { id: "grammar", ar: "مرجع الإعراب", href: "/practice/drill#grammar", icon: "particles" },
+  { id: "resonance", ar: "محطة الرنين", href: "/resonance", icon: "crystal" },
   { id: "games", ar: "أركيد الألعاب", href: "/games", icon: "orbit" },
 ];
 

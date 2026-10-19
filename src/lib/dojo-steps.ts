@@ -26,14 +26,15 @@ export type DojoStepId = (typeof DOJO_STEP_IDS)[number];
 
 /** Icon key resolved to a component by the UI (keeps this registry pure). */
 export type DojoStepIcon =
-  | "orbit"
-  | "spark"
-  | "archive"
-  | "wave"
-  | "trophy"
-  | "volume"
-  | "chart"
-  | "bolt";
+  | "brush"
+  | "shuffle"
+  | "cards"
+  | "ear"
+  | "grid"
+  | "headphones"
+  | "blocks"
+  | "particles"
+  | "drum";
 
 export interface DojoStepMeta {
   id: DojoStepId;
@@ -54,7 +55,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "تدريب على رسم سكتات الكانجي بترتيبها الصحيح لتثبيت الشكل الحركي للحرف.",
     howToAr: "تتبّع المسار المضيء لكل سكتة بالترتيب، والانحراف البسيط لا يُعاقَب.",
     ctaAr: "ابدأ الكتابة",
-    icon: "spark",
+    icon: "brush",
   },
   {
     id: "scramble",
@@ -62,7 +63,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "رتّب الكلمات لبناء جملة يابانية صحيحة المعنى والترتيب.",
     howToAr: "اختر مبتدئًا أو متقدمًا، ثم رتّب الكلمات: فاعل ← مفعول ← فعل.",
     ctaAr: "ابدأ الترتيب",
-    icon: "orbit",
+    icon: "shuffle",
   },
   {
     id: "review",
@@ -70,7 +71,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "راجع بطاقات مفردات القطاع وفق جدول FSRS وقيّم مدى تذكّرك.",
     howToAr: "اقرأ البطاقة واكشف معناها ثم اختر تقييمك: لم أتذكّر، صعب، جيد، سهل.",
     ctaAr: "ابدأ المراجعة",
-    icon: "archive",
+    icon: "cards",
   },
   {
     id: "pitch",
@@ -78,7 +79,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "استمع إلى الكلمة اليابانية واختر معناها العربي الصحيح.",
     howToAr: "تُشغَّل الكلمة تلقائيًا عند بدء الجولة؛ اختر المعنى الصحيح لتزيد نقاطك.",
     ctaAr: "ابدأ الاستماع",
-    icon: "wave",
+    icon: "ear",
   },
   {
     id: "matrix",
@@ -86,7 +87,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "تتبّع سكتات كانجي مختار بالترتيب لتثبيت شكله الذهني.",
     howToAr: "اختر كانجي من الشريط ثم تتبّع كل سكتة بالترتيب.",
     ctaAr: "ابدأ التتبّع",
-    icon: "trophy",
+    icon: "grid",
   },
   {
     id: "listen",
@@ -94,7 +95,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "ترفع سرعة معالجة السمع وربط الكلمة المسموعة بمعناها.",
     howToAr: "اختر سرعة التشغيل والنمط، ثم اختر الترجمة قبل نهاية الموجة.",
     ctaAr: "ابدأ السباق",
-    icon: "volume",
+    icon: "headphones",
   },
   {
     id: "assemble",
@@ -102,7 +103,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "تركيب الجملة بربط الأدوار النحوية بترتيب الفاعل والمفعول والفعل.",
     howToAr: "اسحب الكتل إلى الخانات النحوية ثم اضغط تحقّق.",
     ctaAr: "ابدأ التركيب",
-    icon: "chart",
+    icon: "blocks",
   },
   {
     id: "grammar",
@@ -110,7 +111,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "مرجع متقدّم لأدوات الجملة وربطها بالإعراب العربي.",
     howToAr: "تصفّح المدخلات المرجعية — للقراءة والاستئناس لا للتقييم.",
     ctaAr: "افتح المرجع",
-    icon: "archive",
+    icon: "particles",
   },
   {
     id: "taiko",
@@ -118,7 +119,7 @@ export const DOJO_STEPS: DojoStepMeta[] = [
     descAr: "تثبيت إيقاع المورا (المقاطع والشدة والمد) بالضرب على الطبل.",
     howToAr: "اضرب مركز الطبل للنغمة العالية والحافة للمنخفضة مع الإيقاع.",
     ctaAr: "ابدأ الإيقاع",
-    icon: "bolt",
+    icon: "drum",
   },
 ];
 

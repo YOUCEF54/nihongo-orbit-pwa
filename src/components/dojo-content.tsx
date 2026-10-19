@@ -12,7 +12,9 @@ import {
   RewardModal,
   StageToggle,
   StageViewport,
+  crystalPayout,
   jadePayout,
+  passPayout,
   useStage,
 } from "@/components/ui";
 import ActivityBrief from "@/components/dojo/ActivityBrief";
@@ -28,6 +30,9 @@ import { evaluateGameUnlocks, seenVocab } from "@/lib/game-access";
 import { progressForSector } from "@/lib/sector-progress";
 import { SECTOR_JADE_REWARD, useSectorState } from "@/lib/sector-state";
 import { awardArcadeJade } from "@/lib/starlight";
+import { SECTOR_CRYSTALS, SECTOR_PASSES, awardResonance } from "@/lib/resonance";
+import { styleFinish } from "@/lib/inventory";
+import { useResonance } from "@/lib/use-resonance";
 import { useKanjivgStrokes, type StrokeSlot } from "@/lib/use-kanji-strokes";
 import { createClient } from "@/lib/supabase/client";
 import { kanjiBySector } from "@/lib/data";
@@ -124,6 +129,7 @@ export default function DojoContent({
 
   const sectorState = useSectorState(userId);
   const activeSector = sectorState.active;
+  const wallet = useResonance(userId);
 
   const [deckIndex, setDeckIndex] = useState(0);
   const [matrixKanji, setMatrixKanji] = useState<SeedKanjiNode | null>(() =>
@@ -321,6 +327,7 @@ export default function DojoContent({
     if (!progress.isComplete) return;
     if (!sectorState.markComplete(activeSector)) return;
     awardArcadeJade(userId, SECTOR_JADE_REWARD);
+    awardResonance(userId, { crystals: SECTOR_CRYSTALS, passes: SECTOR_PASSES });
     setReward({
       sectorAr: sectorById(activeSector).titleAr,
       jade: SECTOR_JADE_REWARD,
@@ -440,7 +447,11 @@ export default function DojoContent({
         if (armedStep !== "review") return brief("review", { poolCount: sectorVocab.length });
         return deckData ? (
           <div className="flex h-full min-h-0 flex-col">
-            <SRFlashcard data={deckData} onGrade={(g, next) => handleGrade(currentWord.id, g, next)} />
+            <SRFlashcard
+              data={deckData}
+              finish={styleFinish(wallet)}
+              onGrade={(g, next) => handleGrade(currentWord.id, g, next)}
+            />
             <div className="mt-2 flex items-center justify-between" dir="rtl">
               <span className="lang-ar telemetry text-sm text-faint">
                 {mounted ? currentReviewState ?? "" : "···"}
@@ -794,7 +805,15 @@ export default function DojoContent({
         open={reward !== null}
         onClose={() => setReward(null)}
         titleAr="اكتملت الحملة"
-        payouts={reward ? [jadePayout(reward.jade)] : []}
+        payouts={
+          reward
+            ? [
+                jadePayout(reward.jade),
+                crystalPayout(SECTOR_CRYSTALS),
+                passPayout(SECTOR_PASSES),
+              ]
+            : []
+        }
         note={
           reward ? (
             <div className="flex flex-col gap-2 text-center">

@@ -13,6 +13,7 @@ import {
 } from "@/lib/astral-abacus";
 import { ARCADE_JADE_REWARD } from "@/lib/progress-state";
 import { awardArcadeJade } from "@/lib/starlight";
+import { ARCADE_PASS_POINTS, noteResonanceActivity } from "@/lib/resonance";
 import { RewardModal, jadePayout, StageToggle, PauseToggle, PausedOverlay } from "@/components/ui";
 import { IconRotateCcw, IconRotateCw } from "@/components/icons";
 
@@ -81,6 +82,7 @@ export default function AstralAbacus({
     if (awardedRef.current !== key) {
       awardedRef.current = key;
       const starlight = awardArcadeJade(userId, ARCADE_JADE_REWARD);
+      noteResonanceActivity(userId, ARCADE_PASS_POINTS);
       void queueMicrotask(() => {
         setIsSolved(true);
         setJadeTotal(starlight.jade);

@@ -2,28 +2,30 @@
 
 import type { ComponentType, CSSProperties } from "react";
 import {
-  IconArchive,
-  IconBolt,
-  IconChart,
-  IconOrbit,
+  IconBlocks,
+  IconBrush,
+  IconCards,
+  IconDrum,
+  IconEar,
+  IconGrid,
+  IconHeadphones,
+  IconParticles,
   IconPlay,
-  IconSpark,
-  IconTrophy,
-  IconVolume,
-  IconWave,
+  IconShuffle,
 } from "@/components/icons";
 import { unlockProgress } from "@/lib/game-access";
 import type { DojoStepIcon, DojoStepMeta } from "@/lib/dojo-steps";
 
 const ICON_MAP: Record<DojoStepIcon, ComponentType<{ className?: string }>> = {
-  orbit: IconOrbit,
-  spark: IconSpark,
-  archive: IconArchive,
-  wave: IconWave,
-  trophy: IconTrophy,
-  volume: IconVolume,
-  chart: IconChart,
-  bolt: IconBolt,
+  brush: IconBrush,
+  shuffle: IconShuffle,
+  cards: IconCards,
+  ear: IconEar,
+  grid: IconGrid,
+  headphones: IconHeadphones,
+  blocks: IconBlocks,
+  particles: IconParticles,
+  drum: IconDrum,
 };
 
 export default function ActivityBrief({

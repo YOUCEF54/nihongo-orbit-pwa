@@ -9,12 +9,14 @@ import {
   initEnergy,
   initStreak,
   recordActivity,
+  regenEnergy,
   spendEnergy,
   toDateKey,
   type EnergyState,
   type StreakState,
 } from "./gamification.ts";
 import { awardArcadeJade, noteStarlightReview, type StarlightState } from "./starlight.ts";
+import { noteResonanceActivity } from "./resonance.ts";
 
 const ENERGY_KEY = (uid: string) => `learnjp:energy:${uid}`;
 const STREAK_KEY = (uid: string) => `learnjp:streak:${uid}`;
@@ -111,7 +113,8 @@ export function readStreakOrDefault(uid: string): StreakState {
 }
 
 /** One graded review costs energy, counts as a day of activity, and
-    advances the Momentum economy (multiplier, jade, recovery cache). */
+    advances the Momentum economy (multiplier, jade, recovery cache).
+    It also feeds Standard Pass progress in the Resonance economy. */
 export function noteReviewActivity(
   uid: string,
   now = Date.now(),
@@ -119,9 +122,19 @@ export function noteReviewActivity(
   const energy = spendEnergy(readEnergyOrDefault(uid, now), REVIEW_ENERGY_COST, now).state;
   const streak = recordActivity(readStreakOrDefault(uid), toDateKey(new Date(now))).state;
   const starlight = noteStarlightReview(uid, now);
+  noteResonanceActivity(uid, 1, now);
   saveEnergy(uid, energy);
   saveStreak(uid, streak);
   return { energy, streak, starlight };
+}
+
+/** Consumable effect: top up mental-clarity energy (clamped to the cap). */
+export function grantEnergy(uid: string, amount: number, now = Date.now()): EnergyState {
+  const current = regenEnergy(readEnergyOrDefault(uid, now), now);
+  const value = Math.min(ENERGY_MAX, current.value + Math.max(0, Math.round(amount)));
+  const next = { value, updatedAt: now };
+  saveEnergy(uid, next);
+  return next;
 }
 
 /** One arcade solve: counts as a day of activity and awards Jade.

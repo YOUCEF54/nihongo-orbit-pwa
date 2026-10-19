@@ -50,7 +50,7 @@ export default async function AdminPage() {
   }));
 
   return (
-    <AppShell userEmail={user.email}>
+    <AppShell userEmail={user.email} userId={user.id}>
       <div className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-6">
         <DashboardHeader
           titleAr="لوحة التحكم"

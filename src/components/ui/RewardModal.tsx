@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { IconJade } from "@/components/icons";
+import { IconCrystal, IconJade, IconTicket } from "@/components/icons";
 import { useDialogFocus } from "./use-dialog-focus";
 
 export interface RewardPayout {
@@ -19,6 +19,26 @@ export function jadePayout(amount: number): RewardPayout {
     value: amount,
     icon: IconJade,
     color: "var(--color-amber)",
+  };
+}
+
+/** Resonance Crystals (hard currency) payout. */
+export function crystalPayout(amount: number): RewardPayout {
+  return {
+    label: "بلورات المدار",
+    value: amount,
+    icon: IconCrystal,
+    color: "var(--color-amethyst)",
+  };
+}
+
+/** Standard Signal Tickets (pull passes) payout. */
+export function passPayout(amount: number): RewardPayout {
+  return {
+    label: "تذاكر الإشارة",
+    value: amount,
+    icon: IconTicket,
+    color: "var(--color-cyan)",
   };
 }
 

@@ -5,7 +5,13 @@ export { default as EnergyPanel } from "./EnergyPanel";
 export { default as StreakPanel } from "./StreakPanel";
 export { default as StarlightPanel } from "./StarlightPanel";
 export { default as StudyCard } from "./StudyCard";
-export { default as RewardModal, jadePayout, type RewardPayout } from "./RewardModal";
+export {
+  default as RewardModal,
+  jadePayout,
+  crystalPayout,
+  passPayout,
+  type RewardPayout,
+} from "./RewardModal";
 export { default as EmptyState } from "./EmptyState";
 export { default as ReadingStack } from "./ReadingStack";
 export { default as MiniCarousel, type CarouselItem } from "./MiniCarousel";

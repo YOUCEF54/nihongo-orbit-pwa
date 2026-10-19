@@ -105,7 +105,7 @@ export default function SectorHub({ userId, initialMastery, vocab, kanji }: Sect
               className="h-5 w-[0.45] rounded-full"
               style={{ background: "var(--sector-accent)" }}
             />
-            <span className="lang-ar font-bold mb-1 sector-text">{sectorById(active).titleAr}</span>
+            <span className="lang-ar font-bold sector-text">{sectorById(active).titleAr}</span>
           </span>
           <span className="hud-pill">
             <span className="lang-ar telemetry-label">مُراجَعة</span>

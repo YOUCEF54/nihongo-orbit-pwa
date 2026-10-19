@@ -17,7 +17,9 @@ test("terminal routes are unique and target real anchors or pages", () => {
   assert.equal(new Set(ids).size, ids.length, "duplicate terminal ids");
   for (const route of TERMINAL_ROUTES) {
     assert.ok(
-      route.href.startsWith("/practice/drill#") || route.href === "/games",
+      route.href.startsWith("/practice/drill#") ||
+        route.href === "/games" ||
+        route.href === "/resonance",
       `${route.id} unexpected href ${route.href}`,
     );
   }

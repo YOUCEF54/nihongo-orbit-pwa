@@ -1,6 +1,6 @@
 "use client";
 
-import { themeMeta, THEMES } from "@/lib/themes";
+import { themeMeta, THEMES, type ThemeId } from "@/lib/themes";
 import { useTheme } from "./ThemeProvider";
 
 const THEME_CODES: Record<string, string> = {
@@ -9,25 +9,41 @@ const THEME_CODES: Record<string, string> = {
   minimal: "MIN",
 };
 
-export default function ThemeToggle({ compact = false }: { compact?: boolean }) {
+export default function ThemeToggle({
+  compact = false,
+  owned,
+}: {
+  compact?: boolean;
+  /** When provided, cycling is restricted to the owned themes. */
+  owned?: ThemeId[];
+}) {
   const { theme, setTheme } = useTheme();
+  const pool = owned && owned.length > 0 ? THEMES.filter((t) => owned.includes(t.id)) : THEMES;
   const currentIndex = Math.max(
     0,
-    THEMES.findIndex((t) => t.id === theme),
+    pool.findIndex((t) => t.id === theme),
   );
-  const next = THEMES[(currentIndex + 1) % THEMES.length];
+  const next = pool[(currentIndex + 1) % pool.length] ?? pool[0] ?? THEMES[0];
   const current = themeMeta(theme);
+  const locked = THEMES.length - pool.length;
+  const cyclable = pool.length > 1;
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(next.id)}
-      aria-label={`تبديل السمة إلى ${next.ar}`}
-      title={`انقر للتبديل إلى سمة ${next.ar}`}
+      onClick={() => cyclable && setTheme(next.id)}
+      aria-label={cyclable ? `تبديل السمة إلى ${next.ar}` : "سمات إضافية تُفتح من محطة الرنين"}
+      title={
+        cyclable
+          ? `انقر للتبديل إلى سمة ${next.ar}`
+          : "افتح سمات إضافية من محطة الرنين"
+      }
+      disabled={!cyclable}
+      data-testid="theme-toggle"
       className={
         compact
           ? "flex items-center gap-2 rounded-full border border-line bg-void/70 px-3 py-2 transition hover:border-cyan/50"
-          : "flex items-center gap-2 rounded-full border border-line bg-void/70 px-3 py-2 transition hover:border-cyan/50"
+          : "flex items-center gap-2 rounded-full border border-line bg-void/70 px-3 py-2 transition hover:border-cyan/50 disabled:cursor-not-allowed disabled:opacity-70"
       }
     >
       <span
@@ -40,6 +56,11 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
         </span>
       )}
       <span className="telemetry text-faint">{THEME_CODES[current.id] ?? "TAC"}</span>
+      {!compact && locked > 0 && (
+        <span className="telemetry text-faint" dir="ltr" title="سمات مقفلة">
+          +{locked}
+        </span>
+      )}
     </button>
   );
 }

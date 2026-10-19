@@ -9,8 +9,9 @@
     "lint": "eslint",
     "gen:wotd": "node scripts/gen-wotd-images.mjs",
     "gen:sectors": "node scripts/gen-sector-art.mjs",
-    "predev": "npm run gen:wotd && npm run gen:sectors",
-    "prebuild": "npm run gen:wotd && npm run gen:sectors"
+    "gen:kanjivg": "node scripts/gen-kanjivg.mjs",
+    "predev": "npm run gen:wotd && npm run gen:sectors && npm run gen:kanjivg",
+    "prebuild": "npm run gen:wotd && npm run gen:sectors && npm run gen:kanjivg"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

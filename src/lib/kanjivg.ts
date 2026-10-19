@@ -9,9 +9,16 @@
    <path d="..."> elements are ordered by stroke number. We pull
    those "d" values verbatim (viewBox 0 0 109 109, absolute coords)
    and cache them locally so offline sessions reuse known strokes.
+
+   Resolution order per character: a bundled copy in
+   `public/kanjivg/<5-hex>.svg` (see `kanjivg-local-manifest.ts`,
+   refreshed by `npm run gen:kanjivg`) → localStorage cache → CDN.
    ============================================================ */
+import { kanjivgLocalUrl } from "./kanjivg-local-manifest.ts";
 export const KANJIVG_BASE_URL =
   "https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji";
+
+const SVG_ACCEPT = "image/svg+xml,text/xml,text/plain;q=0.8,*/*;q=0.5";
 
 const CACHE_PREFIX = "learnjp:kanjivg:";
 const CACHE_VERSION = 1;
@@ -118,14 +125,44 @@ function trimCache(): void {
   }
 }
 
+/** Best-effort read of a bundled (same-origin) stroke file — a miss never throws. */
+async function readBundledStrokes(
+  url: string,
+  signal?: AbortSignal,
+): Promise<string[] | null> {
+  try {
+    const response = await fetch(url, {
+      signal,
+      headers: { accept: SVG_ACCEPT },
+    });
+    if (!response.ok) return null;
+    const paths = extractStrokePaths(await response.text());
+    return paths.length > 0 ? paths : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch strokes for a character. The bundled offline copy in
+ * `public/kanjivg/<hex>.svg` wins when present; otherwise the KanjiVG CDN
+ * is used. Throws only when neither source yields strokes.
+ */
 export async function fetchKanjivgStrokes(
   character: string,
   signal?: AbortSignal,
 ): Promise<string[]> {
   const hex = kanjiToStrokeFileHex(character);
+
+  const bundled = kanjivgLocalUrl(hex);
+  if (bundled) {
+    const local = await readBundledStrokes(bundled, signal);
+    if (local) return local;
+  }
+
   const response = await fetch(`${KANJIVG_BASE_URL}/${hex}.svg`, {
     signal,
-    headers: { accept: "image/svg+xml,text/xml,text/plain;q=0.8,*/*;q=0.5" },
+    headers: { accept: SVG_ACCEPT },
   });
   if (!response.ok) throw new Error(`kanjivg: HTTP ${response.status} for ${character}`);
   const text = await response.text();

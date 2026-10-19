@@ -177,3 +177,12 @@ export function noteStarlightReview(uid: string, now = Date.now()): StarlightSta
   saveStarlight(uid, state);
   return state;
 }
+
+/** Consumable effect: top up the Return Cache (clamped to its ceiling). */
+export function grantCache(uid: string, amount: number, now = Date.now()): StarlightState {
+  const state = readStarlightOrDefault(uid);
+  const cache = clamp(state.cache + Math.max(0, Math.round(amount)), 0, CACHE_MAX);
+  const next = { ...state, cache, updatedAt: now };
+  saveStarlight(uid, next);
+  return next;
+}

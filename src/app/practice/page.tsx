@@ -24,7 +24,7 @@ export default async function PracticePage() {
   const initialMastery = await loadMasteryServer(user.id);
 
   return (
-    <AppShell userEmail={user.email}>
+    <AppShell userEmail={user.email} userId={user.id}>
       <SectorHub
         userId={user.id}
         initialMastery={initialMastery}

@@ -40,10 +40,14 @@ export interface FlashcardData {
   srs?: Card;
 }
 
+/** Resonance card finishes (items.ts `style` kind). */
+export type CardFinish = "ember" | "prism";
+
 interface SRFlashcardProps {
   data: FlashcardData;
   onGrade?: (grade: ReviewGrade, next: Card) => void;
   className?: string;
+  finish?: CardFinish | null;
 }
 
 const TOKEN_CLASS: Record<GradeToken, string> = {
@@ -63,10 +67,11 @@ function Ruby({ base, reading }: { base: string; reading?: string }) {
   );
 }
 
-export default function SRFlashcard({ data, onGrade, className }: SRFlashcardProps) {
+export default function SRFlashcard({ data, onGrade, className, finish }: SRFlashcardProps) {
   const [flipped, setFlipped] = useState(false);
   const mounted = useMounted();
   const playbackRef = useRef<Playback | null>(null);
+  const finishClass = finish ? `card-finish-${finish}` : "";
   // FSRS scheduling runs only when the card identity changes, not per render.
   const srsCard = useMemo(() => data.srs ?? createFsrsCard(), [data.srs]);
 
@@ -135,7 +140,7 @@ export default function SRFlashcard({ data, onGrade, className }: SRFlashcardPro
         {/* Front — target */}
         <div
           dir="ltr"
-          className="glass-panel absolute inset-0 flex flex-col items-center justify-center gap-5 rounded-2xl p-7"
+          className={`glass-panel absolute inset-0 flex flex-col items-center justify-center gap-5 rounded-2xl p-7 ${finishClass}`}
           style={{ backfaceVisibility: "hidden" }}
         >
           <span className="hud-pill absolute start-5 top-5">
@@ -165,7 +170,7 @@ export default function SRFlashcard({ data, onGrade, className }: SRFlashcardPro
         <div
           dir="rtl"
           lang="ar"
-          className="lang-ar glass-panel absolute inset-0 flex flex-col gap-3 overflow-y-auto rounded-2xl p-5"
+          className={`lang-ar glass-panel absolute inset-0 flex flex-col gap-3 overflow-y-auto rounded-2xl p-5 ${finishClass}`}
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
           <div className="flex items-center justify-between">
